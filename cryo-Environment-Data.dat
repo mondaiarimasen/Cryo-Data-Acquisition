@@ -1,9 +1,48 @@
 mondaiarimasen
 Created August 14, 2018
 
-This data sheet records the cooling water flow rate (L/min), the temperature of the He compressor outside the building (C), and the temperature (C) and humidity of the lab (the room with the cryostat). Please preserve the order below as: cooling water flow rate (coolWaterFR), temperature of the He compressor (tempHeComp), temperature and humidity of the lab (tempLab and humdLab, respectively)
+This data sheet records relevant data about the environment of room with the cryostat. Please preserve the order below (the order is also written in README.txt):
 
-coolWaterFR = 9
-tempHeComp = 278
-tempLab = 277
-humdLab = 30
+coolWaterFR = 9,
+tempHeComp = 278,
+tempLab = 277,
+humdLab = 30,
+chl1Low = 295,
+chl1Up = 295.2,
+chl2Low = 295,
+chl2Up = 295.2,
+chl3Low = 295,
+chl3Up = 295.2,
+chl4Low = 295,
+chl4Up = 295.2,
+chl5Low = 295,
+chl5Up = 295.2,
+chl6Low = 295,
+chl6Up = 295.2,
+chl7Low = 295,
+chl7Up = 295.2,
+chl8Low = 295,
+chl8Up = 295.2,
+
+Notes: 
+
+coolWaterFR - Cooling water flow rate (L/min),
+tempHeComp - Temperature (K) of the He compressor outside the building,
+tempLab - Temperature (K) of the lab (room with cryostat),
+humdLab - Humidity (%) of the lab (room with cryostat),
+chl1Low - Lower Temperature Limit (K) of Channel 1 (PT2 Head),
+chl1Up - Upper Temperature Limit (K) of Channel 1 (PT2 Head),
+chl2Low - Lower Temperature Limit (K) of Channel 2 (PT2 Plate),
+chl2Up - Upper Temperature Limit (K) of Channel 2 (PT2 Plate),
+chl3Low - Lower Temperature Limit (K) of Channel 3 (1 K Plate),
+chl3Up - Upper Temperature Limit (K) of Channel 3 (1 K Plate),
+chl4Low - Lower Temperature Limit (K) of Channel 4 (Still),
+chl4Up - Upper Temperature Limit (K) of Channel 4 (Still),
+chl5Low - Lower Temperature Limit (K) of Channel 5 (mK Plate Cernox),
+chl5Up - Upper Temperature Limit (K) of Channel 5 (mK Plate Cernox),
+chl6Low - Lower Temperature Limit (K) of Channel 6 (PT1 Head),
+chl6Up - Upper Temperature Limit (K) of Channel 6 (PT1 Head),
+chl7Low - Lower Temperature Limit (K) of Channel 7 (PT1 Plate),
+chl7Up - Upper Temperature Limit (K) of Channel 7 (PT1 Plate),
+chl8Low - Lower Temperature Limit (K) of Channel 8 (mK Plate RuOx),
+chl8Up - Upper Temperature Limit (K) of Channel 8 (mK Plate RuOx),
