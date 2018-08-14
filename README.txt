@@ -35,6 +35,11 @@ II. Program Descriptions
   - cryo-DataView.html
         > website to view all data read by the programs
         > refreshes at user-decided frequency
+        > currently, data table with temperature readings from LS372 is only
+          displayed in Firefox, independent on operating system
+        > no images are supposed to be displayed on the website (except for
+          the two images from hardcoded URLS); they are just placeholders
+          at this point
 
   - cryo-LS372-Temp.dat
         > text file containing temperature readings of all 8 channels of the
@@ -42,6 +47,14 @@ II. Program Descriptions
           set in cryo-RealTime.py
         > cryo-RealTime.py writes to this file
         > cryo-DataView.html reads this file to display on the website
+
+  - cryo-Environment-Data.dat
+        > text file containing data from the environment around the cryostat
+        > stores the values:
+              * coolWaterFR (cooling water flow rate, L/min)
+              * tempHeComp (temperature of He compressor, C)
+              * tempLab (temperature of lab room with cryostat, C)
+              * humdLab (humidity of lab room with cryostat, %)
 
 *****************************************************************************
 III. Comments
