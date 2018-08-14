@@ -1,0 +1,9 @@
+mondaiarimasen
+Created August 14, 2018
+
+This data sheet records the cooling water flow rate (L/min), the temperature of the He compressor outside the building (C), and the temperature (C) and humidity of the lab (the room with the cryostat). Please preserve the order below as: cooling water flow rate (coolWaterFR), temperature of the He compressor (tempHeComp), temperature and humidity of the lab (tempLab and humdLab, respectively)
+
+coolWaterFR = 9
+tempHeComp = 278
+tempLab = 277
+humdLab = 30
