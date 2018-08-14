@@ -1,6 +1,6 @@
 <!-- Victor Zhang, created August 14, 2018 -->
 <!-- Website to monitor all data recorded -->
-<!-- version 0.1.0-->
+<!-- version 0.2.0-->
 <!-- HTML&CSS -->
 
 <!DOCTYPE html>
@@ -37,7 +37,20 @@
     width = 100%;
     height = 1%;
     overflow: auto;
-    background-color: blue;
+    background-color: aqua;
+  }
+  .Row{
+    display:table;
+    width: 100%;
+    table-layout: fixed;
+  }
+  .Column{
+    display:table-cell;
+    background-color: aqua;
+    border-spacing: 20px;
+    border:1px black solid;
+    height = 1%;
+    overflow: auto;
   }
   .dataDivY{
     vertical-align: top;
@@ -59,79 +72,125 @@
     <title>Data Acquisition Page </title>
 
 <script>
-window.onload=function(){ with (new XMLHttpRequest()) {
-  onreadystatechange=cb; open('GET','cryo-LS372-Temp.dat',true); responseType='text';send();
-}}
-function cb(){
+// Javascript environment
+
+// Global variables
+var chlTemp_Low = [], // first element is lower temp. limit of chl 1, etc.
+    chlTemp_Up = []; // first element is upper temp. limit of chl 1, etc.
+
+var coolWaterFR, coolWaterFR_Low, coolWaterFR_Up,
+    tempHeComp, tempHeComp_Low, tempHeComp_Up,
+    tempLab, tempLab_Low, tempLab_Up,
+    humdLab, humdLab_Low, humdLab_Up;
+
+window.onload=function(){ 
+    with (new XMLHttpRequest()) {
+        onreadystatechange = environmentParams; 
+        open('GET','cryo-Environment-Data.dat',true); 
+        responseType='text';
+        send();
+    }
+    with (new XMLHttpRequest()) {
+        onreadystatechange = tempTableWriter; 
+        open('GET','cryo-LS372-Temp.dat',true); 
+        responseType='text';
+        send();
+    }
+}
+
+function tempTableWriter(){
     if(this.readyState===4){
         if(this.status === 200 || this.status === 0){
-            document.getElementById('main').innerHTML = tbl(this.responseText); 
+            document.getElementById('main').innerHTML = getTableText(this.responseText); 
         }
     }
 }
-function tbl(csv){
-    chl1Low = 295;
-    chl1Up = 295.2;
-    chl2Low = 295;
-    chl2Up = 295.2;
-    chl3Low = 295;
-    chl3Up = 295.2;
-    chl4Low = 295;
-    chl4Up = 295.2;
-    chl5Low = 295;
-    chl5Up = 295.2;
-    chl6Low = 295;
-    chl6Up = 295.2;
-    chl7Low = 295;
-    chl7Up = 295.2;
-    chl8Low = 295;
-    chl8Up = 295.2;
+
+function getTableText(csv){
 
     dat = csv.split('\n');
-
-//           .map(function(tr,i){return '<tr><td style = "text-align:center">'
-//                                     +tr.replace(/,/g,'</td><td style = "text-align:center">')
-//                                     +'</td></tr>';})
-//           .join('\n');
     printDat = "<tr><th>Time and Date</th><th>Channel 1</th><th>Channel 2</th><th>Channel 3</th><th>Channel 4</th><th>Channel 5</th><th>Channel 6</th><th>Channel 7</th><th>Channel 8</th></tr><tr><th></th><th>PT2 Head</th><th>PT2 Plate</th><th>1 K Plate</th><th>Still</th><th>mK Plate Cernox</th><th>PT1 Head</th><th>PT1 Plate</th><th>mK Plate RuOx</th></tr>";
     tempRow = "";
 
     // to start printing from the most recent data point (last row in the cryo-LS372-Temp.dat list), in the for loop below, i must start from dat.length-2, since dat.length-1 is an empty row (in realTime_my_socket.py, I add "\n" at the end of writing each row, and in dat = csv.split('\n') above, the separator is '\n', so the last element of dat (dat is an array, where each element is an entire row of cryo-LS372-Temp.dat) is empty
     for (i=dat.length-2; i>=dat.length-5; i--){ 
-        //return dat[i];
         tempRow = dat[i].split(',');
-        //return "past tempRow";
         printDat+='<tr><td style = "text-align:center">' + tempRow[0] + '</td>';
-        //return parseFloat(tempRow[8]);
         for (j = 1; j < 9; j++){
-        //        return "in for";
-            if (parseFloat(tempRow[j]) >= chl1Low && parseFloat(tempRow[j])<=chl1Up){
-                //return j + "here";
+            if (parseFloat(tempRow[j]) >= chlTemp_Low[j-1] && parseFloat(tempRow[j])<=chlTemp_Up[j-1]){
                 printDat += '<td style = "text-align:center;color:green">' + tempRow[j] + '</td>';
             }
             else{
-        //        return tempRow[1] + " " + j + " bye";
                 printDat += '<td style = "text-align:center;color:red">' + tempRow[j] + '</td>';
             }
         }
-        //printDat += '<tr><td style = "text-align:center">' + dat[i].replace(/,/g,'</td><td style = "text-align:center">') + '</td></tr>';
         printDat += "</tr>";
     }
-//    printDat+="</tr>";
-    return printDat; //+ " " + (parseFloat(tempRow[1])+1).toString();
-    //return '<tr>' + dat.length+ '</tr>'; 
+    return printDat;
 }
 
-function coolWaterReading(){
+function environmentParams(){
     if(this.readyState===4){
         if(this.status === 200 || this.status === 0){
-            document.getElementById('coolWaterFR').innerHTML = coolWaterColor(this.responseText); 
+            dat = this.responseText.split('\n');
+            dat = dat.filter(function(e){return e === 0 || e}); // Note: each line of cryo-Environment-Data.dat is an array element of dat
+            
+            // In below, isNaN() checks if string is a number; in particular "12" is counted as a number, while "12/2" is not a number
+            coolWaterFR = dat[3].substring(dat[3].indexOf("=")+1).replace(/\s/g,"");
+            coolWaterFR_Low = dat[4].substring(dat[4].indexOf("=")+1).replace(/\s/g,"");
+            coolWaterFR_Up = dat[5].substring(dat[5].indexOf("=")+1).replace(/\s/g,"");
+            
+            tempHeComp = dat[6].substring(dat[6].indexOf("=")+1).replace(/\s/g,"");      
+            tempHeComp_Low = dat[7].substring(dat[7].indexOf("=")+1).replace(/\s/g,"");
+            tempHeComp_Up = dat[8].substring(dat[8].indexOf("=")+1).replace(/\s/g,"");
+
+            tempLab = dat[9].substring(dat[9].indexOf("=")+1).replace(/\s/g,"");
+            tempLab_Low = dat[10].substring(dat[10].indexOf("=")+1).replace(/\s/g,"");
+            tempLab_Up = dat[11].substring(dat[11].indexOf("=")+1).replace(/\s/g,"");
+
+            humLab = dat[12].substring(dat[12].indexOf("=")+1).replace(/\s/g,"");
+            humLab_Low = dat[13].substring(dat[13].indexOf("=")+1).replace(/\s/g,"");
+            humLab_Up = dat[14].substring(dat[14].indexOf("=")+1).replace(/\s/g,"");
+            
+            for(i = 0; i < 8; i++){
+                chlTemp_Low[i] = dat[15+i*2].substring(dat[15+i*2].indexOf("=")+1).replace(/\s/g,"");
+                chlTemp_Up[i] = dat[16+i*2].substring(dat[16+i*2].indexOf("=")+1).replace(/\s/g,"");
+            }		
+
+            if (parseFloat(coolWaterFR) >= parseFloat(coolWaterFR_Low) && parseFloat(coolWaterFR) <= parseFloat(coolWaterFR_Up)){
+                document.getElementById('coolWaterFREle').innerHTML = '<h3 style = "text-align:center;color:green">' + coolWaterFR + '</h3>';
+            }
+            else{
+                document.getElementById('coolWaterFREle').innerHTML = '<h3 style = "text-align:center;color:red">' + coolWaterFR + '</h3>';
+            }
+
+            if (parseFloat(tempHeComp) >= parseFloat(tempHeComp_Low) && parseFloat(tempHeComp) <= parseFloat(tempHeComp_Up)){
+                document.getElementById('heCompTempEle').innerHTML = '<h3 style = "text-align:center;color:green">' + tempHeComp + '</h3>';
+            }
+            else{
+                document.getElementById('heCompTempEle').innerHTML = '<h3 style = "text-align:center;color:red">' + tempHeComp + '</h3>';
+            }
+
+            var tempHumLine = '<h3 style = "text-align:center">';
+            if (parseFloat(tempLab) >= parseFloat(tempLab_Low) && parseFloat(tempLab) <= parseFloat(tempLab_Up)){
+                tempHumLine += '<span style = "color:green">' + tempLab + '</span>, ';
+            }
+            else{
+                tempHumLine += '<span style = "color:red">' + tempLab + '</span>, ';
+            }
+            if (parseFloat(humLab) >= parseFloat(humLab_Low) && parseFloat(humLab) <= parseFloat(humLab_Up)){
+                tempHumLine += '<span style = "color:green">' + humLab + '</span>';
+            }
+            else{
+                tempHumLine += '<span style = "color:red">' + humLab + '</span>';
+            }
+
+            tempHumLine += "</h3>";
+            document.getElementById('tempHumLabEle').innerHTML = tempHumLine; 
+
         }
     }
-}
 
-function coolWaterColor(){
-    
 }
 
 </script>
@@ -161,32 +220,25 @@ function coolWaterColor(){
     </script>-->
 
 
-
-
-
-
-
-
-
-
-
   <div class = "titleDiv">
     <h1>Test Data Acquisition Page</h1>
   </div>
-  <div class = "dataDivB">
-    <table style = "width:100%;text-align:center;">
-      <tr>
-        <th id = "coolWaterFR"><h2> Cooling Water Flow Rate (L/min): </h2></th>
-        <th><h2>Temp. of He Compressor (C)</h2></th>
-        <th><h2>Temp. (C) and Humdty of Lab</h2></th>
-      </tr>
-      <tr>
-        <td><h3>9 L/min</h3></td>
-        <td><h3>278</h3></td>
-        <td><h3>278, 30%</h3></td>
-      </tr>
-    </table>
+
+ <div class = "Row">
+    <div class = "Column"> 
+        <h2 style="text-align:center;">Cooling Water Flow Rate (L/min)</h2>
+        <p id = "coolWaterFREle"><p>
+    </div>
+    <div class = "Column"> 
+        <h2 style="text-align:center;">Temp. of He Compressor (K)</h2>
+        <p id = "heCompTempEle"><p>
+    </div>
+    <div class = "Column"> 
+        <h2 style="text-align:center;">Temp. (K) and Hum. (%) of Lab</h2>
+        <p id = "tempHumLabEle"><p>
+    </div>
   </div>
+
   <div class = "dataDivY">
     <table id = "main" style="width:100%;text-align:center;background-color:yellow;"></table>
   </div>
