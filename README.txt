@@ -50,11 +50,27 @@ II. Program Descriptions
 
   - cryo-Environment-Data.dat
         > text file containing data from the environment around the cryostat
-        > stores the values:
+        > stores the values in the following order (please do not change):
               * coolWaterFR (cooling water flow rate, L/min)
-              * tempHeComp (temperature of He compressor, C)
-              * tempLab (temperature of lab room with cryostat, C)
+              * tempHeComp (temp. of He compressor, K)
+              * tempLab (temp. of lab room with cryostat, K)
               * humdLab (humidity of lab room with cryostat, %)
+              * chl1Low (lower temp limit, K, of Chl 1, PT2 Head)
+              * chl1Up (upper temp limit, K, of Chl 1, PT2 Head)
+              * chl2Low (lower temp limit, K, of Chl 2, PT2 Plate)
+              * chl2Up (upper temp limit, K, of Chl 2, PT2 Plate)
+              * chl3Low (lower temp limit, K, of Chl 3, 1 K Plate)
+              * chl3Up (upper temp limit, K, of Chl 3, 1 K Plate)
+              * chl4Low (lower temp limit, K, of Chl 4, Still)
+              * chl4Up (upper temp limit, K, of Chl 4, Still)
+              * chl5Low (lower temp limit, K, of Chl 5, mK Plate Cernox)
+              * chl5Up (upper temp limit, K, of Chl 5, mK Plate Cernox)
+              * chl6Low (lower temp limit, K, of Chl 6, PT1 Head)
+              * chl6Up (upper temp limit, K, of Chl 6, PT1 Head)
+              * chl7Low (lower temp limit, K, of Chl 7, PT1 Plate)
+              * chl7Up (upper temp limit, K, of Chl 7 PT1 Plate)
+              * chl8Low (lower temp limit, K, of Chl 8, mK Plate RuOx)
+              * chl8Up (upper temp limit, K, of Chl 8, mK Plate RuOx)
 
 *****************************************************************************
 III. Comments
