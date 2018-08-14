@@ -48,6 +48,14 @@ II. Program Descriptions
         > cryo-RealTime.py writes to this file
         > cryo-DataView.html reads this file to display on the website
 
+  - cryo-Environment-Data.dat
+        > text file containing data from the environment around the cryostat
+        > stores the values:
+              * coolWaterFR (cooling water flow rate, L/min)
+              * tempHeComp (temperature of He compressor, C)
+              * tempLab (temperature of lab room with cryostat, C)
+              * humdLab (humidity of lab room with cryostat, %)
+
 *****************************************************************************
 III. Comments
 
