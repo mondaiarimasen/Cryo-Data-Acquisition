@@ -1,6 +1,6 @@
 # Victor Zhang, created August 15, 2018
 # Cooling Water Flow Rate monitor, by reading data through the LabJack U3-Lv
-# version 0.1.0
+# version 0.2.0
 # Python
 
 '''
