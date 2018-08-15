@@ -11,7 +11,8 @@ I. Motivation
   - have a place to read and monitor:
         > temperature of the channels of the cryostat / dilution
           refrigerator (DR)
-        > flow rate of the cooling water of the He compressor outside building
+        > flow rate of the cooling water of the He compressor outside 
+          building
         > temperature of the He compressor
         > temperature and humidity of the lab room
         > amount of nitrogen left in the nitrogen trap
@@ -24,13 +25,11 @@ I. Motivation
 *****************************************************************************
 II. Program Descriptions
 
-  - cryo-RealTime.py
-        > gets data from the Lake Shore 372 (LS372) device, records to
-           cryo-LS372-Temp.dat, and plots in real time
-        > two types of plots are available: 'static' graph (x-axis is not
-          fixed length, so accommodates more and more data with time) and
-          'shifting' graph (x-axis is fixed length so plot moves to always
-          show most recent data; how recent is user-decided)
+  - cryo-CoolingWaterMonitor.py
+        > gets the cooling water flow rate by reading the voltage from the
+          monitor through the LabJack U3-LV
+        > converts voltage to water flow rate using experimentally 
+          determined relationship
 
   - cryo-DataView.html
         > website to view all data read by the programs
@@ -40,13 +39,6 @@ II. Program Descriptions
         > no images are supposed to be displayed on the website (except for
           the two images from hardcoded URLS); they are just placeholders
           at this point
-
-  - cryo-LS372-Temp.dat
-        > text file containing temperature readings of all 8 channels of the
-          LS372 and time of measurement, over a period of time and frequency
-          set in cryo-RealTime.py
-        > cryo-RealTime.py writes to this file
-        > cryo-DataView.html reads this file to display on the website
 
   - cryo-Environment-Data.dat
         > text file containing data from the environment around the cryostat
@@ -82,6 +74,21 @@ II. Program Descriptions
               * nitroTrapWght (weight of N2 trap, kg)
               * nitroTrapWght_Low (lower limit of nitroTrapWght, kg)  
               * nitroTrapWght_Up (upper limit of nitroTrapWght, kg)
+
+  - cryo-LS372-Temp.dat
+        > text file containing temperature readings of all 8 channels of the
+          LS372 and time of measurement, over a period of time and frequency
+          set in cryo-RealTime.py
+        > cryo-RealTime.py writes to this file
+        > cryo-DataView.html reads this file to display on the website
+
+  - cryo-RealTime.py
+        > gets data from the Lake Shore 372 (LS372) device, records to
+           cryo-LS372-Temp.dat, and plots in real time
+        > two types of plots are available: 'static' graph (x-axis is not
+          fixed length, so accommodates more and more data with time) and
+          'shifting' graph (x-axis is fixed length so plot moves to always
+          show most recent data; how recent is user-decided)
 
 *****************************************************************************
 III. Comments
