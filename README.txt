@@ -93,6 +93,15 @@ II. Program Descriptions
           'shifting' graph (x-axis is fixed length so plot moves to always
           show most recent data; how recent is user-decided)
 
+  - cryo-clientCooling.py
+        > client side to socket communication to send live the flow rate to
+          main computer to display on webpage
+    
+  - cryo-serverCooling.py
+        > server side to socket communication
+        > receives flow rate and updates cryo-Environment-Data.dat so that 
+          webpage can display it
+
 *****************************************************************************
 III. Comments
 
