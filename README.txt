@@ -51,18 +51,6 @@ II. Program Descriptions
   - cryo-Environment-Data.dat
         > text file containing data from the environment around the cryostat
         > stores the values in the following order (please do not change):
-              * coolWaterFR (cooling water flow rate, L/min)
-              * coolWaterFR_Low (lower limit of coolWaterFR, L/min)
-              * coolWaterFR_Up (upper limit of coolWaterFR, L/min)
-              * tempHeComp (temp. of He compressor, K)
-              * tempHeComp_Low (lower temp. limit of tempHeComp, K)
-              * tempHeComp_Up (upper temp. limit of tempHeComp, K)
-              * tempLab (temp. of lab room with cryostat, K)
-              * tempLab_Low (lower temp. limit of tempLab, K)
-              * tempLab_Up (lower temp. limit of tempLab, K)
-              * humLab (humidity of lab room with cryostat, %)
-              * humLab_Low (lower hum. limit of humLab, %)
-              * humLab_Up (upper hum. limit of humLab, %)
               * chl1_Low (lower temp limit, K, of Chl 1, PT2 Head)
               * chl1_Up (upper temp limit, K, of Chl 1, PT2 Head)
               * chl2_Low (lower temp limit, K, of Chl 2, PT2 Plate)
@@ -79,6 +67,21 @@ II. Program Descriptions
               * chl7_Up (upper temp limit, K, of Chl 7 PT1 Plate)
               * chl8_Low (lower temp limit, K, of Chl 8, mK Plate RuOx)
               * chl8_Up (upper temp limit, K, of Chl 8, mK Plate RuOx)
+              * coolWaterFR (cooling water flow rate, L/min)
+              * coolWaterFR_Low (lower limit of coolWaterFR, L/min)
+              * coolWaterFR_Up (upper limit of coolWaterFR, L/min)
+              * tempHeComp (temp. of He compressor, K)
+              * tempHeComp_Low (lower temp. limit of tempHeComp, K)
+              * tempHeComp_Up (upper temp. limit of tempHeComp, K)
+              * tempLab (temp. of lab room with cryostat, K)
+              * tempLab_Low (lower temp. limit of tempLab, K)
+              * tempLab_Up (lower temp. limit of tempLab, K)
+              * humLab (humidity of lab room with cryostat, %)
+              * humLab_Low (lower hum. limit of humLab, %)
+              * humLab_Up (upper hum. limit of humLab, %)
+              * nitroTrapWght (weight of N2 trap, kg)
+              * nitroTrapWght_Low (lower limit of nitroTrapWght, kg)  
+              * nitroTrapWght_Up (upper limit of nitroTrapWght, kg)
 
 *****************************************************************************
 III. Comments
