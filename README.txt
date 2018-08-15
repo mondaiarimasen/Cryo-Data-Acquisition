@@ -30,6 +30,9 @@ II. Program Descriptions
           monitor through the LabJack U3-LV
         > converts voltage to water flow rate using experimentally 
           determined relationship
+        > no consideration of noise in current version
+        > updates cryo-Environment-Data.dat with the new cooling water flow
+          rate
 
   - cryo-DataView.html
         > website to view all data read by the programs
