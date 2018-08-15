@@ -3,22 +3,6 @@ Created August 14, 2018
 
 This data sheet records relevant data about the environment of room with the cryostat. Please preserve the order below (the order is also written in README.txt), and don't add punctuation after each line (e.g. variable_name = 4):
 
-coolWaterFR = 9
-coolWaterFR_Low = 6.8
-coolWaterFR_Up = 9
-
-tempHeComp = 278
-tempHeComp_Low = 277
-tempHeComp_Up = 280
-
-tempLab = 277
-tempLab_Low = 270
-tempLab_Up = 280
-
-humLab = 30
-humLab_Low = 28
-humLab_Up = 29
-
 chl1_Low = -1
 chl1_Up = 1
 
@@ -43,23 +27,27 @@ chl7_Up = 295.2
 chl8_Low = 295
 chl8_Up = 295.2
 
+coolWaterFR = 9
+coolWaterFR_Low = 6.8
+coolWaterFR_Up = 9
+
+tempHeComp = 278
+tempHeComp_Low = 277
+tempHeComp_Up = 280
+
+tempLab = 277
+tempLab_Low = 270
+tempLab_Up = 280
+
+humLab = 30
+humLab_Low = 28
+humLab_Up = 29
+
+nitroTrapWght = 20
+nitroTrapWght_Low = 19
+nitroTrapWght_Up = 21
+
 Notes: 
-
-coolWaterFR - Cooling water flow rate (L/min)
-coolWaterFR_Low - Lower limit (L/min)
-coolWaterFR_Up - Upper limit (L/min)
-
-tempHeComp - Temp. (K) of He compressor 
-tempHeComp_Low - Lower Temp. Limit (K) 
-tempHeComp_up - Upper Temp. Limit (K) 
-
-tempLab - Temp. (K) of lab 
-tempLab_Low - Lower Temp. Limit (K)
-tempLab_Up - Upper Temp. Limit (K)
-
-humLab - Humidity (%) of lab
-humLab_Low - Lower Humidity Limit (%)
-humLab_Up - Upper Humidity Limit (%)
 
 chl1_Low - Lower Temperature Limit (K) of Channel 1 (PT2 Head)
 chl1_Up - Upper Temperature Limit (K) of Channel 1 (PT2 Head)
@@ -84,3 +72,23 @@ chl7_Up - Upper Temperature Limit (K) of Channel 7 (PT1 Plate)
 
 chl8_Low - Lower Temperature Limit (K) of Channel 8 (mK Plate RuOx)
 chl8_Up - Upper Temperature Limit (K) of Channel 8 (mK Plate RuOx)
+
+coolWaterFR - Cooling water flow rate (L/min)
+coolWaterFR_Low - Lower limit (L/min)
+coolWaterFR_Up - Upper limit (L/min)
+
+tempHeComp - Temp. (K) of He compressor 
+tempHeComp_Low - Lower Temp. Limit (K) 
+tempHeComp_up - Upper Temp. Limit (K) 
+
+tempLab - Temp. (K) of lab 
+tempLab_Low - Lower Temp. Limit (K)
+tempLab_Up - Upper Temp. Limit (K)
+
+humLab - Humidity (%) of lab
+humLab_Low - Lower Humidity Limit (%)
+humLab_Up - Upper Humidity Limit (%)
+
+nitroTrapWght - Weight of nitrogen trap (kg)
+nitroTrapWght_Low - Lower limit
+nitroTrapWght_Up - Upper limit
