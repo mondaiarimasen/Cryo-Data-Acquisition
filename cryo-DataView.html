@@ -1,6 +1,6 @@
 <!-- Victor Zhang, created August 14, 2018 -->
 <!-- Website to monitor all data recorded -->
-<!-- version 0.2.0-->
+<!-- version 0.2.1-->
 <!-- HTML&CSS -->
 
 <!DOCTYPE html>
@@ -81,7 +81,8 @@ var chlTemp_Low = [], // first element is lower temp. limit of chl 1, etc.
 var coolWaterFR, coolWaterFR_Low, coolWaterFR_Up,
     tempHeComp, tempHeComp_Low, tempHeComp_Up,
     tempLab, tempLab_Low, tempLab_Up,
-    humdLab, humdLab_Low, humdLab_Up;
+    humdLab, humdLab_Low, humdLab_Up,
+    nitroTrapWght, nitroTrapWght_Low, nitroTrapWght_Up;
 
 window.onload=function(){ 
     with (new XMLHttpRequest()) {
@@ -136,25 +137,29 @@ function environmentParams(){
             dat = dat.filter(function(e){return e === 0 || e}); // Note: each line of cryo-Environment-Data.dat is an array element of dat
             
             // In below, isNaN() checks if string is a number; in particular "12" is counted as a number, while "12/2" is not a number
-            coolWaterFR = dat[3].substring(dat[3].indexOf("=")+1).replace(/\s/g,"");
-            coolWaterFR_Low = dat[4].substring(dat[4].indexOf("=")+1).replace(/\s/g,"");
-            coolWaterFR_Up = dat[5].substring(dat[5].indexOf("=")+1).replace(/\s/g,"");
+            coolWaterFR = dat[19].substring(dat[19].indexOf("=")+1).replace(/\s/g,"");
+            coolWaterFR_Low = dat[20].substring(dat[20].indexOf("=")+1).replace(/\s/g,"");
+            coolWaterFR_Up = dat[21].substring(dat[21].indexOf("=")+1).replace(/\s/g,"");
             
-            tempHeComp = dat[6].substring(dat[6].indexOf("=")+1).replace(/\s/g,"");      
-            tempHeComp_Low = dat[7].substring(dat[7].indexOf("=")+1).replace(/\s/g,"");
-            tempHeComp_Up = dat[8].substring(dat[8].indexOf("=")+1).replace(/\s/g,"");
+            tempHeComp = dat[22].substring(dat[22].indexOf("=")+1).replace(/\s/g,"");      
+            tempHeComp_Low = dat[23].substring(dat[23].indexOf("=")+1).replace(/\s/g,"");
+            tempHeComp_Up = dat[24].substring(dat[24].indexOf("=")+1).replace(/\s/g,"");
 
-            tempLab = dat[9].substring(dat[9].indexOf("=")+1).replace(/\s/g,"");
-            tempLab_Low = dat[10].substring(dat[10].indexOf("=")+1).replace(/\s/g,"");
-            tempLab_Up = dat[11].substring(dat[11].indexOf("=")+1).replace(/\s/g,"");
+            tempLab = dat[25].substring(dat[25].indexOf("=")+1).replace(/\s/g,"");
+            tempLab_Low = dat[26].substring(dat[26].indexOf("=")+1).replace(/\s/g,"");
+            tempLab_Up = dat[27].substring(dat[27].indexOf("=")+1).replace(/\s/g,"");
 
-            humLab = dat[12].substring(dat[12].indexOf("=")+1).replace(/\s/g,"");
-            humLab_Low = dat[13].substring(dat[13].indexOf("=")+1).replace(/\s/g,"");
-            humLab_Up = dat[14].substring(dat[14].indexOf("=")+1).replace(/\s/g,"");
+            humLab = dat[28].substring(dat[28].indexOf("=")+1).replace(/\s/g,"");
+            humLab_Low = dat[29].substring(dat[29].indexOf("=")+1).replace(/\s/g,"");
+            humLab_Up = dat[30].substring(dat[30].indexOf("=")+1).replace(/\s/g,"");
+
+            nitroTrapWght = dat[31].substring(dat[31].indexOf("=")+1).replace(/\s/g,"");
+            nitroTrapWght_Low = dat[32].substring(dat[32].indexOf("=")+1).replace(/\s/g,"");
+            nitroTrapWght_Up = dat[33].substring(dat[33].indexOf("=")+1).replace(/\s/g,"");
             
             for(i = 0; i < 8; i++){
-                chlTemp_Low[i] = dat[15+i*2].substring(dat[15+i*2].indexOf("=")+1).replace(/\s/g,"");
-                chlTemp_Up[i] = dat[16+i*2].substring(dat[16+i*2].indexOf("=")+1).replace(/\s/g,"");
+                chlTemp_Low[i] = dat[3+i*2].substring(dat[3+i*2].indexOf("=")+1).replace(/\s/g,"");
+                chlTemp_Up[i] = dat[4+i*2].substring(dat[4+i*2].indexOf("=")+1).replace(/\s/g,"");
             }		
 
             if (parseFloat(coolWaterFR) >= parseFloat(coolWaterFR_Low) && parseFloat(coolWaterFR) <= parseFloat(coolWaterFR_Up)){
@@ -188,14 +193,20 @@ function environmentParams(){
             tempHumLine += "</h3>";
             document.getElementById('tempHumLabEle').innerHTML = tempHumLine; 
 
+            if (parseFloat(nitroTrapWght) >= parseFloat(nitroTrapWght_Low) && parseFloat(nitroTrapWght) <= parseFloat(nitroTrapWght_Up)){
+                document.getElementById('nitroTrapEle').innerHTML = '<h3 style = "text-align:center;color:green">' + nitroTrapWght + '</h3>';
+            }
+            else{
+                document.getElementById('nitroTrapEle').innerHTML = '<h3 style = "text-align:center;color:red">' + nitroTrapWght + '</h3>';
+            }
+
         }
     }
 
 }
 
+
 </script>
-
-
 
 
 
@@ -234,8 +245,12 @@ function environmentParams(){
         <p id = "heCompTempEle"><p>
     </div>
     <div class = "Column"> 
-        <h2 style="text-align:center;">Temp. (K) and Hum. (%) of Lab</h2>
+        <h2 style="text-align:center;">Temp. (K), Hum. (%) of Lab</h2>
         <p id = "tempHumLabEle"><p>
+    </div>
+    <div class = "Column"> 
+        <h2 style="text-align:center;">Weight (kg) of N2 Trap</h2>
+        <p id = "nitroTrapEle"><p>
     </div>
   </div>
 
@@ -244,7 +259,7 @@ function environmentParams(){
   </div>
 
   <div class = "imgbox">
-   <img class = "center-fit" src='realTimeTempGraph2.png'></img>
+   <img class = "center-fit" src='realTimeTempGraph2.png' />
   </div>
   <div class = "imgbox">
    <img class = "center-fit" src="http://goo.gl/ijai22" />
@@ -258,6 +273,7 @@ function environmentParams(){
   <h2>Temperature of Channel 1</h2>
   <h3>temp: 100K</h3>
   <h2>Temp Chl 2 </h2>
+
 
   <p><font color = "red">asdlfkn fd aklfld askfdsl slfkl lakfslk skl kalk  klkcmlcicnckd a; 'ds lasf dlld'</font></p>
   <b>Bold text</b>
