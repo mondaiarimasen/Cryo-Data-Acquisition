@@ -42,6 +42,7 @@ II. Program Descriptions
         > no images are supposed to be displayed on the website (except for
           the two images from hardcoded URLS); they are just placeholders
           at this point
+        > sends email notifications
 
   - cryo-Environment-Data.dat
         > text file containing data from the environment around the cryostat
