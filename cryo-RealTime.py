@@ -4,7 +4,6 @@
 # Python
 
 ## imports ##
-
 import socket
 from datetime import datetime, timedelta
 import time
@@ -17,7 +16,7 @@ date_time = "" # later holds current date and time
 allTemp = "" # later holds all the temp readings
 sleepTime = 5 # how many seconds between temperature taking
 stopDate = "2018-08-16" # write in %Y-%m-%d format, ex. 2018-08-16, or 2018-01-04, but NOT 18-8-6 NOR 18-1-4
-stopHour = 20 # what hour (in 24 hours) want to stop; ex. if want to stop at 10:00, then stopHour = 10; if want to stop at 19:00, then stopHour = 19; stopHour is an int, don't make it a string
+stopHour = 21 # what hour (in 24 hours) want to stop; ex. if want to stop at 10:00, then stopHour = 10; if want to stop at 19:00, then stopHour = 19; stopHour is an int, don't make it a string
 dataAmt = 100000 # amount of data points you anticipate (or want); you will get this many temperature readings of each channel; check if this is enough to reach the desired stopDate and stopHour based on your sleepTime
 repeatlength = 20 # how many points on the x-axis you want
 deg = 90 # rotation degree of x-axis tick labels; this is another x-axis label display option
