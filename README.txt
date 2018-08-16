@@ -38,10 +38,10 @@ II. Program Descriptions
         > website to view all data read by the programs
         > refreshes at user-decided frequency
         > currently, data table with temperature readings from LS372 is only
-          displayed in Firefox, independent on operating system
-        > no images are supposed to be displayed on the website (except for
-          the two images from hardcoded URLS); they are just placeholders
-          at this point
+          displayed in Firefox, independent of operating system
+        > displays plot produced in real time by cryo-RealTime.py and file
+          update frequency can be made to show each new plot produced by
+          cryo-RealTime.py        
         > sends email notifications
 
   - cryo-Environment-Data.dat
@@ -88,7 +88,7 @@ II. Program Descriptions
 
   - cryo-RealTime.py
         > gets data from the Lake Shore 372 (LS372) device, records to
-           cryo-LS372-Temp.dat, and plots in real time
+           cryo-LS372-Temp.dat, plots in real time, saves plot 
         > two types of plots are available: 'static' graph (x-axis is not
           fixed length, so accommodates more and more data with time) and
           'shifting' graph (x-axis is fixed length so plot moves to always
@@ -106,7 +106,7 @@ II. Program Descriptions
 *****************************************************************************
 III. Comments
 
-  - dataView will most likely not be on a domain or server, as that is a bit
+  - DataView will most likely not be on a domain or server, as that is a bit
     complicated for current purposes
 
 *****************************************************************************
