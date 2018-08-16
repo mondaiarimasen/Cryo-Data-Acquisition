@@ -1,25 +1,22 @@
 <!-- Victor Zhang, created August 14, 2018 -->
 <!-- Website to monitor all data recorded -->
-<!-- version 0.2.1-->
+<!-- version 0.3.0-->
 <!-- HTML&CSS -->
 
 <!DOCTYPE html>
 <html>
 <head>
 <meta http-equiv="refresh" content="5">
-  <style>
-   /* * {
-    margin: 0.5%;
-    padding: 0;
-    background-color: yellow;
-  }*/
+<style>
   .titleDiv{
     width: 100%;
     height: 1%;
     overflow: auto;
-    background-color: red;
+    background-color: white;
+    color: black;
     text-align: center;
     display: block;
+    border: 1px black solid;
   }
   .imgbox {
     display: grid;
@@ -32,19 +29,13 @@
     max-height: 100vh;
     margin: auto;
   }
-  .dataDivB{
-    vertical-align: top;
-    width = 100%;
-    height = 1%;
-    overflow: auto;
-    background-color: aqua;
-  }
-  .Row{
+  .EnvironRow{
     display:table;
     width: 100%;
     table-layout: fixed;
+    border: 1px black solid;
   }
-  .Column{
+  .EnvironColumn{
     display:table-cell;
     background-color: aqua;
     border-spacing: 20px;
@@ -52,27 +43,27 @@
     height = 1%;
     overflow: auto;
   }
-  .dataDivY{
+  .LSTempDiv{
     vertical-align: top;
     width = 100%;
     height = 1%;
     overflow: auto;
     background-color: yellow;
   }
-  .dataDivBor{
-    vertical-align: top;
-    width = 100%;
-    height = 1%;
-    overflow: auto;
-    display: inline-block;
-    border: 2px solid black;
-  }
-  </style>
+</style>
 
-    <title>Data Acquisition Page </title>
+<!-- Following two Javascript scripts are needed to send email notifications / warnings if something goes wrong -->
+<!-- Using EmailJS.com to send emails; NOTE: Free Monthly Quota of 200 emails -->
+<!-- Please do not combine with "general" Javascript script below -->
+<script type="text/javascript" src="https://cdn.emailjs.com/sdk/2.2.4/email.min.js"></script>
+<script type="text/javascript">
+  (function(){
+    //emailjs.init("<YOUR USER ID>"); // Uncomment this line to start the email notifications
+  })();
+</script>
 
 <script>
-// Javascript environment
+// General Javascript script (please do not combine above two scripts with this)
 
 // Global variables
 var chlTemp_Low = [], // first element is lower temp. limit of chl 1, etc.
@@ -84,16 +75,27 @@ var coolWaterFR, coolWaterFR_Low, coolWaterFR_Up,
     humdLab, humdLab_Low, humdLab_Up,
     nitroTrapWght, nitroTrapWght_Low, nitroTrapWght_Up;
 
-window.onload=function(){ 
+var channelNames = {
+  1: "PT2 Head",
+  2: "PT2 Plate",
+  3: "1 K Plate",
+  4: "Still",
+  5: "mK Plate Cernox",
+  6: "PT1 Head",
+  7: "PT1 Plate",
+  8: "mk Plate RuOx"
+};
+
+window.onload=function(){
     with (new XMLHttpRequest()) {
-        onreadystatechange = environmentParams; 
-        open('GET','cryo-Environment-Data.dat',true); 
+        onreadystatechange = environmentParams;
+        open('GET','cryo-Environment-Data.dat',true);
         responseType='text';
         send();
     }
     with (new XMLHttpRequest()) {
-        onreadystatechange = tempTableWriter; 
-        open('GET','cryo-LS372-Temp.dat',true); 
+        onreadystatechange = tempTableWriter;
+        open('GET','cryo-LS372-Temp.dat',true);
         responseType='text';
         send();
     }
@@ -102,20 +104,29 @@ window.onload=function(){
 function tempTableWriter(){
     if(this.readyState===4){
         if(this.status === 200 || this.status === 0){
-            document.getElementById('main').innerHTML = getTableText(this.responseText); 
+            document.getElementById('LSTempTable').innerHTML = getTableText(this.responseText);
         }
     }
 }
 
 function getTableText(csv){
-
     dat = csv.split('\n');
-    printDat = "<tr><th>Time and Date</th><th>Channel 1</th><th>Channel 2</th><th>Channel 3</th><th>Channel 4</th><th>Channel 5</th><th>Channel 6</th><th>Channel 7</th><th>Channel 8</th></tr><tr><th></th><th>PT2 Head</th><th>PT2 Plate</th><th>1 K Plate</th><th>Still</th><th>mK Plate Cernox</th><th>PT1 Head</th><th>PT1 Plate</th><th>mK Plate RuOx</th></tr>";
-    tempRow = "";
+    var printDat = "<tr><th>Time and Date</th>";
 
-    // to start printing from the most recent data point (last row in the cryo-LS372-Temp.dat list), in the for loop below, i must start from dat.length-2, since dat.length-1 is an empty row (in realTime_my_socket.py, I add "\n" at the end of writing each row, and in dat = csv.split('\n') above, the separator is '\n', so the last element of dat (dat is an array, where each element is an entire row of cryo-LS372-Temp.dat) is empty
-    for (i=dat.length-2; i>=dat.length-5; i--){ 
-        tempRow = dat[i].split(',');
+    for (i = 1; i<9; i++){
+      printDat += "<th>Channel " + i.toString() + "</th>";
+    }
+    printDat += "</tr><tr><th></th>";
+
+
+    for(i = 1; i<9; i++){
+      printDat += "<th>" + channelNames[i] + "</th>";
+    }
+    printDat += "</tr>";
+
+    // Starts printing from the most recent data point (last row in the cryo-LS372-Temp.dat list), in the for loop below, i must start from dat.length-2, since dat.length-1 is an empty row (in realTime_my_socket.py, I add "\n" at the end of writing each row, and in dat = csv.split('\n') above, the separator is '\n', so the last element of dat (dat is an array, where each element is an entire row of cryo-LS372-Temp.dat) is empty
+    for (i=dat.length-2; i>=dat.length-5; i--){
+        var tempRow = dat[i].split(',');
         printDat+='<tr><td style = "text-align:center">' + tempRow[0] + '</td>';
         for (j = 1; j < 9; j++){
             if (parseFloat(tempRow[j]) >= chlTemp_Low[j-1] && parseFloat(tempRow[j])<=chlTemp_Up[j-1]){
@@ -123,6 +134,7 @@ function getTableText(csv){
             }
             else{
                 printDat += '<td style = "text-align:center;color:red">' + tempRow[j] + '</td>';
+                sendWarning(channelNames[j] + ' Temp.', channelNames[j] + ' (Chl ' + j.toString() + ') Temp.', tempRow[j], 'K', chlTemp_Low[j-1], chlTemp_Up[j-1]);
             }
         }
         printDat += "</tr>";
@@ -130,18 +142,23 @@ function getTableText(csv){
     return printDat;
 }
 
+// sets the global variables, which are environment parameters, to their values from cryo-Environment-Data.dat
 function environmentParams(){
     if(this.readyState===4){
         if(this.status === 200 || this.status === 0){
             dat = this.responseText.split('\n');
-            dat = dat.filter(function(e){return e === 0 || e}); // Note: each line of cryo-Environment-Data.dat is an array element of dat
-            
-            // In below, isNaN() checks if string is a number; in particular "12" is counted as a number, while "12/2" is not a number
+            // Note: each line of cryo-Environment-Data.dat is an array element of dat
+
+            // below line gets rid of any lines that are whitespaces or empty lines
+            dat = dat.filter(function(entry){return /\S/.test(entry);});
+
+            // hopefully the hardcoded indices don't change; that would be a problem
+            // hardcoded indices are not good
             coolWaterFR = dat[19].substring(dat[19].indexOf("=")+1).replace(/\s/g,"");
             coolWaterFR_Low = dat[20].substring(dat[20].indexOf("=")+1).replace(/\s/g,"");
             coolWaterFR_Up = dat[21].substring(dat[21].indexOf("=")+1).replace(/\s/g,"");
-            
-            tempHeComp = dat[22].substring(dat[22].indexOf("=")+1).replace(/\s/g,"");      
+
+            tempHeComp = dat[22].substring(dat[22].indexOf("=")+1).replace(/\s/g,"");
             tempHeComp_Low = dat[23].substring(dat[23].indexOf("=")+1).replace(/\s/g,"");
             tempHeComp_Up = dat[24].substring(dat[24].indexOf("=")+1).replace(/\s/g,"");
 
@@ -156,17 +173,18 @@ function environmentParams(){
             nitroTrapWght = dat[31].substring(dat[31].indexOf("=")+1).replace(/\s/g,"");
             nitroTrapWght_Low = dat[32].substring(dat[32].indexOf("=")+1).replace(/\s/g,"");
             nitroTrapWght_Up = dat[33].substring(dat[33].indexOf("=")+1).replace(/\s/g,"");
-            
+
             for(i = 0; i < 8; i++){
                 chlTemp_Low[i] = dat[3+i*2].substring(dat[3+i*2].indexOf("=")+1).replace(/\s/g,"");
                 chlTemp_Up[i] = dat[4+i*2].substring(dat[4+i*2].indexOf("=")+1).replace(/\s/g,"");
-            }		
+            }
 
             if (parseFloat(coolWaterFR) >= parseFloat(coolWaterFR_Low) && parseFloat(coolWaterFR) <= parseFloat(coolWaterFR_Up)){
                 document.getElementById('coolWaterFREle').innerHTML = '<h3 style = "text-align:center;color:green">' + coolWaterFR + '</h3>';
             }
             else{
                 document.getElementById('coolWaterFREle').innerHTML = '<h3 style = "text-align:center;color:red">' + coolWaterFR + '</h3>';
+                sendWarning('Flow Rate', 'Cooling Water Flow Rate', coolWaterFR, 'L/min', coolWaterFR_Low, coolWaterFR_Up);
             }
 
             if (parseFloat(tempHeComp) >= parseFloat(tempHeComp_Low) && parseFloat(tempHeComp) <= parseFloat(tempHeComp_Up)){
@@ -174,6 +192,7 @@ function environmentParams(){
             }
             else{
                 document.getElementById('heCompTempEle').innerHTML = '<h3 style = "text-align:center;color:red">' + tempHeComp + '</h3>';
+                sendWarning('Temp. He Comp.', 'Temp. He Comp.', tempHeComp, 'K', tempHeComp_Low, tempHeComp_Up);
             }
 
             var tempHumLine = '<h3 style = "text-align:center">';
@@ -182,22 +201,25 @@ function environmentParams(){
             }
             else{
                 tempHumLine += '<span style = "color:red">' + tempLab + '</span>, ';
+                sendWarning('Temp. Lab', 'Temp. of Lab', tempLab, 'K', tempLab_Low, tempLab_Up);
             }
             if (parseFloat(humLab) >= parseFloat(humLab_Low) && parseFloat(humLab) <= parseFloat(humLab_Up)){
                 tempHumLine += '<span style = "color:green">' + humLab + '</span>';
             }
             else{
                 tempHumLine += '<span style = "color:red">' + humLab + '</span>';
+                sendWarning('Hum. Lab', 'Humidity of Lab', humLab, '%', humLab_Low, humLab_Up);
             }
 
             tempHumLine += "</h3>";
-            document.getElementById('tempHumLabEle').innerHTML = tempHumLine; 
+            document.getElementById('tempHumLabEle').innerHTML = tempHumLine;
 
             if (parseFloat(nitroTrapWght) >= parseFloat(nitroTrapWght_Low) && parseFloat(nitroTrapWght) <= parseFloat(nitroTrapWght_Up)){
                 document.getElementById('nitroTrapEle').innerHTML = '<h3 style = "text-align:center;color:green">' + nitroTrapWght + '</h3>';
             }
             else{
                 document.getElementById('nitroTrapEle').innerHTML = '<h3 style = "text-align:center;color:red">' + nitroTrapWght + '</h3>';
+                sendWarning('Wght N2 Trap', 'Weight of N2 Trap', nitroTrapWght, 'kg', nitroTrapWght_Low, nitroTrapWght_Up);
             }
 
         }
@@ -205,57 +227,61 @@ function environmentParams(){
 
 }
 
+// method called to send email warnings in case a value is out of its acceptable limits
+function sendWarning(short, long, param, units, low, high){
+  var templateParams = {
+    issue_Short: short,
+    issue_Long: long,
+    issueParam: param,
+    issueUnits: units,
+    lowerLimit: low,
+    upperLimit: high,
+    };
+  emailjs.send('<YOUR SERVICE ID>', '<YOUR TEMPLATE ID>', templateParams).then(
+    function(response) {
+      console.log('SUCCESS!', response.status, response.text);
+    }, function(error) {
+      console.log('FAILED...', error);
+    });
+}
+
 
 </script>
 
 
-
+<title>Data Acquisition Page </title>
 
 </head>
 
 <body>
-<!--
-    <input type="button" id='script' name="scriptbutton" value=" Run Script " onclick="goPython()">
-
-    <script src="http://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
-
-    <script>
-        function goPython(){
-            $.ajax({
-              url: "realTime_my_socket.py",
-             context: document.body
-            }).done(function() {
-             alert('finished python script');;
-            });
-        }
-    </script>-->
-
 
   <div class = "titleDiv">
-    <h1>Test Data Acquisition Page</h1>
+    <h1>Cryostat Data Acquisition and Monitoring Page</h1>
   </div>
 
- <div class = "Row">
-    <div class = "Column"> 
+
+
+ <div class = "EnvironRow">
+    <div class = "EnvironColumn">
         <h2 style="text-align:center;">Cooling Water Flow Rate (L/min)</h2>
         <p id = "coolWaterFREle"><p>
     </div>
-    <div class = "Column"> 
+    <div class = "EnvironColumn">
         <h2 style="text-align:center;">Temp. of He Compressor (K)</h2>
         <p id = "heCompTempEle"><p>
     </div>
-    <div class = "Column"> 
+    <div class = "EnvironColumn">
         <h2 style="text-align:center;">Temp. (K), Hum. (%) of Lab</h2>
         <p id = "tempHumLabEle"><p>
     </div>
-    <div class = "Column"> 
+    <div class = "EnvironColumn">
         <h2 style="text-align:center;">Weight (kg) of N2 Trap</h2>
         <p id = "nitroTrapEle"><p>
     </div>
   </div>
 
-  <div class = "dataDivY">
-    <table id = "main" style="width:100%;text-align:center;background-color:yellow;"></table>
+  <div class = "LSTempDiv">
+    <table id = "LSTempTable" style="width:100%;text-align:center;background-color:yellow;"></table>
   </div>
 
   <div class = "imgbox">
@@ -274,13 +300,14 @@ function environmentParams(){
   <h3>temp: 100K</h3>
   <h2>Temp Chl 2 </h2>
 
-
   <p><font color = "red">asdlfkn fd aklfld askfdsl slfkl lakfslk skl kalk  klkcmlcicnckd a; 'ds lasf dlld'</font></p>
   <b>Bold text</b>
   <i>Italic text</i>
   <u>Underlined text</u>
   <sub>Subscript text</sub>
   <sup>Superscript text</sup>
+
+
 
 </body>
 </html>
