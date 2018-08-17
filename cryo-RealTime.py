@@ -1,6 +1,6 @@
 # Victor Zhang, created August 14, 2018
 # Real Time Temperature Acquisition from Lake Shore 372 device
-# version 2.0.0
+# version 3.0.0
 # Python
 
 ## imports ##
@@ -15,38 +15,33 @@ brght = 1 # brightness of LS372 display; 0=25%, 1=50%, 2=75%, 3=100%
 date_time = "" # later holds current date and time 
 allTemp = "" # later holds all the temp readings
 sleepTime = 0.5 # how many seconds between temperature taking
-stopDate = "2018-08-16" # write in %Y-%m-%d format, ex. 2018-08-16, or 2018-01-04, but NOT 18-8-6 NOR 18-1-4
+stopDate = "2018-08-23" # write in %Y-%m-%d format, ex. 2018-08-16, or 2018-01-04, but NOT 18-8-6 NOR 18-1-4
 stopHour = 22 # what hour (in 24 hours) want to stop; ex. if want to stop at 10:00, then stopHour = 10; if want to stop at 19:00, then stopHour = 19; stopHour is an int, don't make it a string
-dataAmt = 100000 # amount of data points you anticipate (or want); you will get this many temperature readings of each channel; check if this is enough to reach the desired stopDate and stopHour based on your sleepTime
+dataAmt = 1000000 # amount of data points you anticipate (or want); you will get this many temperature readings of each channel; check if this is enough to reach the desired stopDate and stopHour based on your sleepTime
 repeatlength = 20 # how many points on the x-axis you want
 deg = 90 # rotation degree of x-axis tick labels; this is another x-axis label display option
 staticXInt = 100 # display the x-axis tick label on the static graph every staticXInt number of data points
-dontMove = False # static graph (you can see all data), set dontMove = True; shifting graph (fixed x-axis length), set dontMove = False
 
 ## Constants (please don't change the values of these) ##
 ip_address = "192.168.0.12" # IP Address of LS372
 lsPort = 7777 # port that LS372 can only communicate with
 rdgst_dict = {"000":"Valid reading is present", "001":"CS OVL", "002":"VCM OVL", "004":"VMIX OVL", "008":"VDIF OVL", "016":"R. OVER", "032":"R. UNDER", "064":"T. OVER", "128":"T. UNDER"} # dictionary of RDGST readings and their meanings
 term = "\r\n" # terminator command for sending commands to LS372; this is what the manual refers to when it says "terminator"
-
 iterNum = 0 # not really constant, since the for loop below changes it, but the user should not change its value from 0
-
-totChannelNum = 8
+totChannelNum = 8 # to avoid hardcoding in the number of channels
 channelNames = ["PT2 Head", "PT2 Plate", "1 K Plate", "Still", "mK Plate Cernox", "PT1 Head", "PT1 Plate", "mk Plate RuOx"] # first element is channel 1, etc
 graph_AllChannel_Name = 'realTimeGraph-allChannels.png' # image shows all the channels
-line_AllChannels = np.empty(totChannelNum,dtype='object') # holds the line objects for the 8 Channels
+line_AllChannels = np.empty(totChannelNum,dtype='object') # holds the line objects for the 8 Channels (for plotting)
 colors = ['k-', 'r-', 'b-', 'y-', 'm-', 'c-', 'g-', 'ro-'] # colors used to color the 8 channels 
 graph_Special_Proxy = [7, 2, 3, 5] # which channels I am using to proxy the temp in the respective graph
 graph_Special_Name = ['realTime-PT1.png', 'realTime-PT2.png', 'realTime-1K.png', 'realTime-MK.png']
-fig_Special = np.empty(len(graph_Special_Name),dtype='object') # holds the figure objects for the special graphs
-ax_Special = np.empty(len(graph_Special_Name),dtype='object') # holds the axes objects for the special graphs
-line_Special = np.empty(len(graph_Special_Name),dtype='object') # holds the line objects for the special graphs
+fig_Special = np.empty(len(graph_Special_Name),dtype='object') # holds the figure objects for the special graphs (for plotting)
+ax_Special = np.empty(len(graph_Special_Name),dtype='object') # holds the axes objects for the special graphs (for plotting)
+line_Special = np.empty(len(graph_Special_Name),dtype='object') # holds the line objects for the special graphs (for plotting)
 file_Name = 'cryo-LS372-Temp.dat' ## Temperature from LS372 is saved to this file
-
 chlTemp = np.zeros((dataAmt,totChannelNum)) + 300 # temp of 300K for all channels by default
 recTime = np.empty(dataAmt,dtype='object') # holds the x-axis time & date labels
 x = np.arange(dataAmt) # x values, from 0 to dataAmt-1, inclusive (in a bijective mapping to recTime elements)
-
 
 ##################################################################
 
@@ -187,27 +182,28 @@ while stopDate != date_time[:len(stopDate)] or stopHour != int(date_time[11:13])
     
     # Plotting the graph with all channels #
     imin = min(max(0,iterNum - repeatlength), len(x) - repeatlength)
-    print("In dontMove True: %s" % dontMove)
+    print("In AllChannels")
     for j in range(0,totChannelNum):
         line_AllChannels[j].set_xdata(x[:iterNum])
         line_AllChannels[j].set_ydata(chlTemp[:iterNum,j:j+1])
     ax_AllChannels.xaxis.set_ticks(x[:iterNum:staticXInt])
-    ax_AllChannels.set_xticklabels(recTime[:iterNum:staticXInt])#,rotation=deg) # can use this instead if don't like plt.gcf().autofmt_xdate(), but warning that rotation of any deg other than 90 can result in confusion, since the tick mark is centered on the horizontal projection of oblique tick label
+    ax_AllChannels.set_xticklabels(recTime[:iterNum:staticXInt])#,rotation=deg) # can use this instead if don't like plt.gcf().autofmt_xdate() or label.set_rotation below, but warning that rotation of any deg other than 90 can result in confusion, since the tick mark is centered on the horizontal projection of oblique tick label
     ax_AllChannels.set_xlim(0,iterNum)
     ax_AllChannels.set_title("Real Time Temperature of All Channels of Cryostat - Static")
     ax_AllChannels.legend(channelNames,loc=2, bbox_to_anchor=(0.80, 0.9),fancybox=False, shadow=False, ncol=1)
+    # below for loop makes the x-axis labels have a nice slant
     for label in ax_AllChannels.get_xmajorticklabels():
         label.set_rotation(30)
         label.set_horizontalalignment("right")
     fig_AllChannels.savefig(graph_AllChannel_Name)
 
     # Plotting Special Graphs #
-    print("In dontMove False: %s" % dontMove)
+    print("In Special")
     for j in range(0,len(graph_Special_Name)):
         line_Special[j].set_xdata(x[imin:iterNum])
         line_Special[j].set_ydata(chlTemp[imin:iterNum,graph_Special_Proxy[j]-1:graph_Special_Proxy[j]])
         ax_Special[j].xaxis.set_ticks(x[imin:iterNum])
-        ax_Special[j].set_xticklabels(recTime[imin:iterNum])#,rotation=deg) # can use this instead if don't like plt.gcf().autofmt_xdate(), but warning that rotation of any deg other than 90 can result in confusion, since the tick mark is centered on the horizontal projection of oblique tick label
+        ax_Special[j].set_xticklabels(recTime[imin:iterNum])#,rotation=deg) # can use this instead if don't like plt.gcf().autofmt_xdate() or label.set_rotation, but warning that rotation of any deg other than 90 can result in confusion, since the tick mark is centered on the horizontal projection of oblique tick label
         ax_Special[j].relim()
         ax_Special[j].autoscale()
         if iterNum>repeatlength:
@@ -217,13 +213,14 @@ while stopDate != date_time[:len(stopDate)] or stopHour != int(date_time[11:13])
 
         print("plotting")
         ax_Special[j].set_title("Real Time Temperature of " + channelNames[graph_Special_Proxy[j]-1] + " (Channel " + str(graph_Special_Proxy[j]) + " is proxy)")
+        # below for loop makes the x-axis labels have a nice slant
         for label in ax_Special[j].get_xmajorticklabels():
             label.set_rotation(30)
             label.set_horizontalalignment("right")
 
     plt.xlabel("Date and Time")
     plt.ylabel("Temperature (K)")
-    #plt.gcf().autofmt_xdate() # makes x-axis labels look nice, but the first label may stretch pretty far past the y-axis, so it might be undesirable; I have rotation=deg available above in ax.set_xticklabels()
+    #plt.gcf().autofmt_xdate() # makes x-axis labels look nice, but the first label may stretch pretty far past the y-axis, so it might be undesirable; I have rotation=deg available above in ax.set_xticklabels(); another option is label.set_rotation
     plt.gcf().subplots_adjust(bottom=0.5)
     plt.tight_layout()    
     plt.draw()
