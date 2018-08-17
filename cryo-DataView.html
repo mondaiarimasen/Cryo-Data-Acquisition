@@ -12,8 +12,8 @@
     width: 100%;
     height: 1%;
     overflow: auto;
-    background-color: white;
-    color: black;
+    background-color: black;
+    color: white;
     text-align: center;
     display: block;
     border: 1px black solid;
@@ -22,7 +22,7 @@
     display: grid;
     width:100%
     height: auto;
-    border: 2px solid black;
+    border: 1px solid black;
   }
   .center-fit {
     max-width: 100%;
@@ -33,22 +33,35 @@
     display:table;
     width: 100%;
     table-layout: fixed;
-    border: 1px black solid;
   }
   .EnvironColumn{
     display:table-cell;
-    background-color: aqua;
+    background-color: yellow;
     border-spacing: 20px;
     border:1px black solid;
     height = 1%;
     overflow: auto;
   }
+  .imgRow{
+    display:table;
+    width: 100%;
+    table-layout: fixed;
+  }
+  .imgColumn{
+    display:table-cell;
+    background-color: yellow;
+    border-spacing: 20px;
+    height = 1%;
+    overflow: auto;
+   }
   .LSTempDiv{
     vertical-align: top;
     width = 100%;
     height = 1%;
     overflow: auto;
     background-color: yellow;
+    color: black;
+    border:1px black solid;
   }
 </style>
 
@@ -111,6 +124,7 @@ function tempTableWriter(){
 
 function getTableText(csv){
     dat = csv.split('\n');
+    dat.shift() // gets rid of the first line of the document, which is the header, and has no data values
     var printDat = "<tr><th>Time and Date</th>";
 
     for (i = 1; i<9; i++){
@@ -281,11 +295,34 @@ function sendWarning(short, long, param, units, low, high){
   </div>
 
   <div class = "LSTempDiv">
-    <table id = "LSTempTable" style="width:100%;text-align:center;background-color:yellow;"></table>
+    <table id = "LSTempTable" style="width:100%;text-align:center;"></table>
   </div>
 
   <div class = "imgbox">
-   <img class = "center-fit" src='graphRealTime.png' />
+   <img class = "center-fit" src='realTimeGraph-allChannels.png' />
+  </div>
+
+ <div class = "imgRow">
+   <div class="imgColumn">
+  <div class = "imgbox">
+   <img class = "center-fit" src='realTime-PT1.png' />
+  </div>
+
+  <div class = "imgbox">
+   <img class = "center-fit" src='realTime-1K.png' />
+  </div>
+</div>
+
+
+   <div class="imgRow">
+  <div class = "imgbox">
+   <img class = "center-fit" src='realTime-PT2.png' />
+  </div>
+
+  <div class = "imgbox">
+   <img class = "center-fit" src='realTime-MK.png' />
+  </div>
+</div>
   </div>
  
   <b>mondaiarimasen</b>
