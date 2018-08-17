@@ -39,7 +39,7 @@ II. Program Descriptions
         > refreshes at user-decided frequency
         > currently, data table with temperature readings from LS372 is only
           displayed in Firefox, independent of operating system
-        > displays plot produced in real time by cryo-RealTime.py and file
+        > displays plots produced in real time by cryo-RealTime.py and file
           update frequency can be made to show each new plot produced by
           cryo-RealTime.py        
         > sends email notifications
@@ -93,6 +93,8 @@ II. Program Descriptions
           fixed length, so accommodates more and more data with time) and
           'shifting' graph (x-axis is fixed length so plot moves to always
           show most recent data; how recent is user-decided)
+        > plots all 8 channels on static graph, and PT1,2, 1K plate, and mK 
+          plate temp. on separate shifting graphs
 
   - cryo-clientCooling.py
         > client side to socket communication to send live the flow rate to
