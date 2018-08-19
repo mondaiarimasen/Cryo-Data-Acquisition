@@ -1,12 +1,13 @@
 <!-- Victor Zhang, created August 14, 2018 -->
 <!-- Website to monitor all data recorded -->
-<!-- version 2.0.0-->
+<!-- version 2.0.1-->
 <!-- HTML&CSS -->
 
 <!DOCTYPE html>
 <html>
 <head>
-<meta http-equiv="refresh" content="5"> <!-- content is how many frequently (in seconds) you want the page to refresh -->
+<meta http-equiv="refresh" content="83"> <!-- content is how many frequently (in seconds) you want the page to refresh -->
+  
 <style>
   .titleDiv{
     width: 100%;
@@ -99,6 +100,7 @@ var channelNames = {
   8: "mk Plate RuOx"
 };
 
+// this is called every time the window loads / after every time I refresh the page
 window.onload=function(){
     with (new XMLHttpRequest()) {
         onreadystatechange = environmentParams;
@@ -138,7 +140,25 @@ function getTableText(csv){
     }
     printDat += "</tr>";
 
-    // Starts printing from the most recent data point (last row in the cryo-LS372-Temp.dat list), in the for loop below, i must start from dat.length-2, since dat.length-1 is an empty row (in realTime_my_socket.py, I add "\n" at the end of writing each row, and in dat = csv.split('\n') above, the separator is '\n', so the last element of dat (dat is an array, where each element is an entire row of cryo-LS372-Temp.dat) is empty
+		    // Starts printing from the most recent data point (last row in the cryo-LS372-Temp.dat list), in the for loop below, i must start from dat.length-2, since dat.length-1 is an empty row (in realTime_my_socket.py, I add "\n" at the end of writing each row, and in dat = csv.split('\n') above, the separator is '\n', so the last element of dat (dat is an array, where each element is an entire row of cryo-LS372-Temp.dat) is empty
+
+    if (dat.length < 10){
+        for (i=dat.length-2;i>=0; i--){
+            var tempRow = dat[i].split(',');
+			printDat+='<tr><td style = "text-align:center">' + tempRow[0] + '</td>';
+			for (j = 1; j < 9; j++){
+			    if (parseFloat(tempRow[j]) >= chlTemp_Low[j-1] && parseFloat(tempRow[j])<=chlTemp_Up[j-1]){
+				    printDat += '<td style = "text-align:center;color:green">' + tempRow[j] + '</td>';
+                }
+                else{
+                    printDat += '<td style = "text-align:center;color:red">' + tempRow[j] + '</td>';
+                    sendWarning(channelNames[j] + ' Temp.', channelNames[j] + ' (Chl ' + j.toString() + ') Temp.', tempRow[j], 'K', chlTemp_Low[j-1], chlTemp_Up[j-1]);
+                }
+            }
+        }
+        printDat += "</tr>";
+        return printDat;
+    }
     for (i=dat.length-2; i>=dat.length-5; i--){
         var tempRow = dat[i].split(',');
         printDat+='<tr><td style = "text-align:center">' + tempRow[0] + '</td>';
