@@ -7,7 +7,7 @@
 <html>
 <head>
 <meta http-equiv="refresh" content="83"> <!-- content is how many frequently (in seconds) you want the page to refresh -->
-  
+
 <style>
   .titleDiv{
     width: 100%;
@@ -89,6 +89,8 @@ var coolWaterFR, coolWaterFR_Low, coolWaterFR_Up,
     humdLab, humdLab_Low, humdLab_Up,
     nitroTrapWght, nitroTrapWght_Low, nitroTrapWght_Up;
 
+var dataBWTDisChlTemp;
+
 var channelNames = {
   1: "PT2 Head",
   2: "PT2 Plate",
@@ -140,40 +142,42 @@ function getTableText(csv){
     }
     printDat += "</tr>";
 
-		    // Starts printing from the most recent data point (last row in the cryo-LS372-Temp.dat list), in the for loop below, i must start from dat.length-2, since dat.length-1 is an empty row (in realTime_my_socket.py, I add "\n" at the end of writing each row, and in dat = csv.split('\n') above, the separator is '\n', so the last element of dat (dat is an array, where each element is an entire row of cryo-LS372-Temp.dat) is empty
-
-    if (dat.length < 10){
+		// Starts printing from the most recent data point (last row in the cryo-LS372-Temp.dat list)
+    // in the for loop below, i must start from dat.length-2, since dat.length-1 is an empty row (in realTime_my_socket.py, I add "\n" at the end of writing each row, and in dat = csv.split('\n') above, the separator is '\n', so the last element of dat (dat is an array, where each element is an entire row of cryo-LS372-Temp.dat) is empty
+    if (dat.length < dataBWTDisChlTemp){
         for (i=dat.length-2;i>=0; i--){
             var tempRow = dat[i].split(',');
-			printDat+='<tr><td style = "text-align:center">' + tempRow[0] + '</td>';
-			for (j = 1; j < 9; j++){
-			    if (parseFloat(tempRow[j]) >= chlTemp_Low[j-1] && parseFloat(tempRow[j])<=chlTemp_Up[j-1]){
-				    printDat += '<td style = "text-align:center;color:green">' + tempRow[j] + '</td>';
-                }
-                else{
-                    printDat += '<td style = "text-align:center;color:red">' + tempRow[j] + '</td>';
-                    sendWarning(channelNames[j] + ' Temp.', channelNames[j] + ' (Chl ' + j.toString() + ') Temp.', tempRow[j], 'K', chlTemp_Low[j-1], chlTemp_Up[j-1]);
-                }
+            printDat+='<tr><td style = "text-align:center">' + tempRow[0] + '</td>';
+            for (j = 1; j < 9; j++){
+              if (parseFloat(tempRow[j]) >= chlTemp_Low[j-1] && parseFloat(tempRow[j])<=chlTemp_Up[j-1]){
+                printDat += '<td style = "text-align:center;color:green">' + tempRow[j] + '</td>';
+              }
+              else{
+                printDat += '<td style = "text-align:center;color:red">' + tempRow[j] + '</td>';
+                sendWarning(channelNames[j] + ' Temp.', channelNames[j] + ' (Chl ' + j.toString() + ') Temp.', tempRow[j], 'K', chlTemp_Low[j-1], chlTemp_Up[j-1]);
+              }
             }
         }
         printDat += "</tr>";
         return printDat;
     }
-    for (i=dat.length-2; i>=dat.length-5; i--){
-        var tempRow = dat[i].split(',');
-        printDat+='<tr><td style = "text-align:center">' + tempRow[0] + '</td>';
-        for (j = 1; j < 9; j++){
-            if (parseFloat(tempRow[j]) >= chlTemp_Low[j-1] && parseFloat(tempRow[j])<=chlTemp_Up[j-1]){
-                printDat += '<td style = "text-align:center;color:green">' + tempRow[j] + '</td>';
-            }
-            else{
-                printDat += '<td style = "text-align:center;color:red">' + tempRow[j] + '</td>';
-                sendWarning(channelNames[j] + ' Temp.', channelNames[j] + ' (Chl ' + j.toString() + ') Temp.', tempRow[j], 'K', chlTemp_Low[j-1], chlTemp_Up[j-1]);
-            }
-        }
-        printDat += "</tr>";
+    else{
+      for (i=dat.length-2; i>=0; i = i - dataBWTDisChlTemp){
+          var tempRow = dat[i].split(',');
+          printDat+='<tr><td style = "text-align:center">' + tempRow[0] + '</td>';
+          for (j = 1; j < 9; j++){
+              if (parseFloat(tempRow[j]) >= chlTemp_Low[j-1] && parseFloat(tempRow[j])<=chlTemp_Up[j-1]){
+                  printDat += '<td style = "text-align:center;color:green">' + tempRow[j] + '</td>';
+              }
+              else{
+                  printDat += '<td style = "text-align:center;color:red">' + tempRow[j] + '</td>';
+                  sendWarning(channelNames[j] + ' Temp.', channelNames[j] + ' (Chl ' + j.toString() + ') Temp.', tempRow[j], 'K', chlTemp_Low[j-1], chlTemp_Up[j-1]);
+              }
+          }
+          printDat += "</tr>";
+      }
+      return printDat;
     }
-    return printDat;
 }
 
 // sets the global variables, which are environment parameters, to their values from cryo-Environment-Data.dat
@@ -207,6 +211,8 @@ function environmentParams(){
             nitroTrapWght = dat[31].substring(dat[31].indexOf("=")+1).replace(/\s/g,"");
             nitroTrapWght_Low = dat[32].substring(dat[32].indexOf("=")+1).replace(/\s/g,"");
             nitroTrapWght_Up = dat[33].substring(dat[33].indexOf("=")+1).replace(/\s/g,"");
+
+            dataBWTDisChlTemp = dat[34].substring(dat[34].indexOf("=")+1).replace(/\s/g,"");
 
             for(i = 0; i < 8; i++){
                 chlTemp_Low[i] = dat[3+i*2].substring(dat[3+i*2].indexOf("=")+1).replace(/\s/g,"");
@@ -344,8 +350,8 @@ function sendWarning(short, long, param, units, low, high){
   </div>
 </div>
   </div>
- 
+
   <b>mondaiarimasen</b>
-   
+
 </body>
 </html>
