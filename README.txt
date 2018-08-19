@@ -80,6 +80,7 @@ II. Program Descriptions
               * nitroTrapWght_Up (upper limit of nitroTrapWght, kg)
               * dataBWTDisChlTemp (# of data pts. between each displayed chl
                 temp on HTML page)
+              * dataDisNum (# of data rows in chl temp displayed)
 
   - cryo-LS372-Temp.dat
         > text file containing temperature readings of all 8 channels of the
