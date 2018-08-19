@@ -1,6 +1,6 @@
 <!-- Victor Zhang, created August 14, 2018 -->
 <!-- Website to monitor all data recorded -->
-<!-- version 2.0.1-->
+<!-- version 2.1.0-->
 <!-- HTML&CSS -->
 
 <!DOCTYPE html>
@@ -89,7 +89,7 @@ var coolWaterFR, coolWaterFR_Low, coolWaterFR_Up,
     humdLab, humdLab_Low, humdLab_Up,
     nitroTrapWght, nitroTrapWght_Low, nitroTrapWght_Up;
 
-var dataBWTDisChlTemp;
+var dataBWTDisChlTemp, dataDisNum;
 
 var channelNames = {
   1: "PT2 Head",
@@ -162,19 +162,26 @@ function getTableText(csv){
         return printDat;
     }
     else{
-      for (i=dat.length-2; i>=0; i = i - dataBWTDisChlTemp){
-          var tempRow = dat[i].split(',');
-          printDat+='<tr><td style = "text-align:center">' + tempRow[0] + '</td>';
-          for (j = 1; j < 9; j++){
-              if (parseFloat(tempRow[j]) >= chlTemp_Low[j-1] && parseFloat(tempRow[j])<=chlTemp_Up[j-1]){
-                  printDat += '<td style = "text-align:center;color:green">' + tempRow[j] + '</td>';
-              }
-              else{
-                  printDat += '<td style = "text-align:center;color:red">' + tempRow[j] + '</td>';
-                  sendWarning(channelNames[j] + ' Temp.', channelNames[j] + ' (Chl ' + j.toString() + ') Temp.', tempRow[j], 'K', chlTemp_Low[j-1], chlTemp_Up[j-1]);
-              }
+      var count = 0;
+      for (i=dat.length-2; i>=0 ; i = i - dataBWTDisChlTemp){
+          if (count<dataDisNum){
+            var tempRow = dat[i].split(',');
+            printDat+='<tr><td style = "text-align:center">' + tempRow[0] + '</td>';
+            for (j = 1; j < 9; j++){
+                if (parseFloat(tempRow[j]) >= chlTemp_Low[j-1] && parseFloat(tempRow[j])<=chlTemp_Up[j-1]){
+                      printDat += '<td style = "text-align:center;color:green">' + tempRow[j] + '</td>';
+                }
+                else{
+                    printDat += '<td style = "text-align:center;color:red">' + tempRow[j] + '</td>';
+                    sendWarning(channelNames[j] + ' Temp.', channelNames[j] + ' (Chl ' + j.toString() + ') Temp.', tempRow[j], 'K', chlTemp_Low[j-1], chlTemp_Up[j-1]);
+                }
+            }
+            printDat += "</tr>";
+            count++;
           }
-          printDat += "</tr>";
+          else{
+            break;
+          }
       }
       return printDat;
     }
@@ -213,6 +220,7 @@ function environmentParams(){
             nitroTrapWght_Up = dat[33].substring(dat[33].indexOf("=")+1).replace(/\s/g,"");
 
             dataBWTDisChlTemp = dat[34].substring(dat[34].indexOf("=")+1).replace(/\s/g,"");
+            dataDisNum = dat[35].substring(dat[35].indexOf("=")+1).replace(/\s/g,"");
 
             for(i = 0; i < 8; i++){
                 chlTemp_Low[i] = dat[3+i*2].substring(dat[3+i*2].indexOf("=")+1).replace(/\s/g,"");
