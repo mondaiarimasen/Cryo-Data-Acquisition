@@ -1,6 +1,6 @@
 # Victor Zhang, created August 14, 2018
 # Real Time Temperature Acquisition from Lake Shore 372 device
-# version 3.0.1
+# version 3.1.0
 # Python
 
 ## imports ##
@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 brght = 1 # brightness of LS372 display; 0=25%, 1=50%, 2=75%, 3=100%
 date_time = "" # later holds current date and time 
 allTemp = "" # later holds all the temp readings
-sleepTime = 80 # how many seconds between temperature taking
+sleepTime = 0.5 # how many seconds between temperature taking
 stopDate = "2018-08-23" # write in %Y-%m-%d format, ex. 2018-08-16, or 2018-01-04, but NOT 18-8-6 NOR 18-1-4
 stopHour = 22 # what hour (in 24 hours) want to stop; ex. if want to stop at 10:00, then stopHour = 10; if want to stop at 19:00, then stopHour = 19; stopHour is an int, don't make it a string
 dataAmt = 1000000 # amount of data points you anticipate (or want); you will get this many temperature readings of each channel; check if this is enough to reach the desired stopDate and stopHour based on your sleepTime
@@ -101,17 +101,17 @@ file.close()
 
 # sets up the x-axis time labels #
 def setTime():
-    date_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
-    date_timeObj = datetime.strptime(date_time, '%Y-%m-%d %H:%M:%S.%f')
+    date_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S') #.%f') # if want to see microseconds, add .%f after %S, but need to add it everywhere the time shows up
+    date_timeObj = datetime.strptime(date_time, '%Y-%m-%d %H:%M:%S') #.%f')
     # this accounts for the time needed to go from fig = plt.figure() to actually plotting the first point this was used in testing because the time was off by a few milliseconds, and here I am setting up all the x axis labels; couldn't find a way to display the live time on the graph, so I'm approximating it here, but as I said, if it's off, it's off by milliseconds
     date_timeObj = date_timeObj + timedelta(milliseconds = sleepTime*2*1000+100) 
     print("setTime, making the x-labels")
     print("date_timeObj = date_time + %s: %s" % (sleepTime*1000, date_timeObj))
-    recTime[0] = date_timeObj.strftime('%Y-%m-%d %H:%M:%S.%f')
+    recTime[0] = date_timeObj.strftime('%Y-%m-%d %H:%M:%S') #.%f')
     day = date_timeObj.day
     for i in range(1,len(recTime)):
-        recTimeObj = datetime.strptime(recTime[i-1], '%Y-%m-%d %H:%M:%S.%f') + timedelta(milliseconds = sleepTime*1000)
-        recTime[i] = recTimeObj.strftime('%Y-%m-%d %H:%M:%S.%f')[:-5]
+        recTimeObj = datetime.strptime(recTime[i-1], '%Y-%m-%d %H:%M:%S') + timedelta(milliseconds = sleepTime*1000)
+        recTime[i] = recTimeObj.strftime('%Y-%m-%d %H:%M:%S')
 
 # the combined graph, static
 fig_AllChannels = plt.figure(figsize=(15,8))
@@ -126,7 +126,7 @@ for i in range(0,len(graph_Special_Name)):
 
 setTime()
 # for calibration/testing purposes
-date_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
+date_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 print("date_time after fig, ax: %s\n" % date_time)
 
 for i in range(0, len(colors)):
@@ -141,7 +141,7 @@ print("while starting\n")
 while stopDate != date_time[:len(stopDate)] or stopHour != int(date_time[11:13]):
 
     ## Part 1: getting the temperature and writing to file ##
-    date_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
+    date_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     print("iterNum: %s, date_time: %s" % (iterNum, date_time))
     print("Stopping on: %s at hour %s" % (stopDate, stopHour))
     allTemp = date_time + ","
