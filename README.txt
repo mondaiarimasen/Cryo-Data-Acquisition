@@ -11,7 +11,7 @@ I. Motivation
   - have a place to read and monitor:
         > temperature of the channels of the cryostat / dilution
           refrigerator (DR)
-        > flow rate of the cooling water of the He compressor outside 
+        > flow rate of the cooling water of the He compressor outside
           building
         > temperature of the He compressor
         > temperature and humidity of the lab room
@@ -28,7 +28,7 @@ II. Program Descriptions
   - cryo-CoolingWaterMonitor.py
         > gets the cooling water flow rate by reading the voltage from the
           monitor through the LabJack U3-LV
-        > converts voltage to water flow rate using experimentally 
+        > converts voltage to water flow rate using experimentally
           determined relationship
         > no consideration of noise in current version
         > updates cryo-Environment-Data.dat with the new cooling water flow
@@ -41,7 +41,7 @@ II. Program Descriptions
           displayed in Firefox, independent of operating system
         > displays plots produced in real time by cryo-RealTime.py and file
           update frequency can be made to show each new plot produced by
-          cryo-RealTime.py        
+          cryo-RealTime.py
         > sends email notifications
 
   - cryo-Environment-Data.dat
@@ -76,8 +76,10 @@ II. Program Descriptions
               * humLab_Low (lower hum. limit of humLab, %)
               * humLab_Up (upper hum. limit of humLab, %)
               * nitroTrapWght (weight of N2 trap, kg)
-              * nitroTrapWght_Low (lower limit of nitroTrapWght, kg)  
+              * nitroTrapWght_Low (lower limit of nitroTrapWght, kg)
               * nitroTrapWght_Up (upper limit of nitroTrapWght, kg)
+              * dataBWTDisChlTemp (# of data pts. between each displayed chl
+                temp on HTML page)
 
   - cryo-LS372-Temp.dat
         > text file containing temperature readings of all 8 channels of the
@@ -88,21 +90,21 @@ II. Program Descriptions
 
   - cryo-RealTime.py
         > gets data from the Lake Shore 372 (LS372) device, records to
-           cryo-LS372-Temp.dat, plots in real time, saves plot 
+           cryo-LS372-Temp.dat, plots in real time, saves plot
         > two types of plots are available: 'static' graph (x-axis is not
           fixed length, so accommodates more and more data with time) and
           'shifting' graph (x-axis is fixed length so plot moves to always
           show most recent data; how recent is user-decided)
-        > plots all 8 channels on static graph, and PT1,2, 1K plate, and mK 
+        > plots all 8 channels on static graph, and PT1,2, 1K plate, and mK
           plate temp. on separate shifting graphs
 
   - cryo-clientCooling.py
         > client side to socket communication to send live the flow rate to
           main computer to display on webpage
-    
+
   - cryo-serverCooling.py
         > server side to socket communication
-        > receives flow rate and updates cryo-Environment-Data.dat so that 
+        > receives flow rate and updates cryo-Environment-Data.dat so that
           webpage can display it
 
 *****************************************************************************
