@@ -1,6 +1,6 @@
 # Victor Zhang, created August 14, 2018
 # Real Time Temperature Acquisition from Lake Shore 372 device
-# version 3.0.0
+# version 3.0.1
 # Python
 
 ## imports ##
@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 brght = 1 # brightness of LS372 display; 0=25%, 1=50%, 2=75%, 3=100%
 date_time = "" # later holds current date and time 
 allTemp = "" # later holds all the temp readings
-sleepTime = 0.5 # how many seconds between temperature taking
+sleepTime = 80 # how many seconds between temperature taking
 stopDate = "2018-08-23" # write in %Y-%m-%d format, ex. 2018-08-16, or 2018-01-04, but NOT 18-8-6 NOR 18-1-4
 stopHour = 22 # what hour (in 24 hours) want to stop; ex. if want to stop at 10:00, then stopHour = 10; if want to stop at 19:00, then stopHour = 19; stopHour is an int, don't make it a string
 dataAmt = 1000000 # amount of data points you anticipate (or want); you will get this many temperature readings of each channel; check if this is enough to reach the desired stopDate and stopHour based on your sleepTime

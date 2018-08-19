@@ -3,33 +3,33 @@ Created August 14, 2018
 
 This data sheet records relevant data about the environment of room with the cryostat. Please preserve the order below (the order is also written in README.txt), and don't add punctuation after each line (e.g. variable_name = 4):
 
-chl1_Low = -1
-chl1_Up = 1
+chl1_Low = 2
+chl1_Up = 300
 
-chl2_Low = 295
-chl2_Up = 296.2
+chl2_Low = 2
+chl2_Up = 300
 
-chl3_Low = 295
-chl3_Up = 295.2
+chl3_Low = 1
+chl3_Up = 300
 
-chl4_Low = 295
-chl4_Up = 295.2
+chl4_Low = 0.5
+chl4_Up = 300
 
-chl5_Low = 295
-chl5_Up = 295.2
+chl5_Low = 0.1
+chl5_Up = 300
 
-chl6_Low = 295
-chl6_Up = 295.2
+chl6_Low = 40
+chl6_Up = 300
 
-chl7_Low = 295
-chl7_Up = 295.2
+chl7_Low = 40
+chl7_Up = 300
 
-chl8_Low = 295
-chl8_Up = 295.2
+chl8_Low = 0.04
+chl8_Up = 300
 
-coolWaterFR = 6.4
+coolWaterFR = 6.398
 coolWaterFR_Low = 6.8
-coolWaterFR_Up = 9
+coolWaterFR_Up = 9.0
 
 tempHeComp = 278
 tempHeComp_Low = 277
@@ -40,8 +40,8 @@ tempLab_Low = 270
 tempLab_Up = 280
 
 humLab = 30
-humLab_Low = 38
-humLab_Up = 39
+humLab_Low = 28
+humLab_Up = 30
 
 nitroTrapWght = 20
 nitroTrapWght_Low = 19
