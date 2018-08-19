@@ -27,7 +27,7 @@ chl7_Up = 295.2
 chl8_Low = 295
 chl8_Up = 295.2
 
-coolWaterFR = 9
+coolWaterFR = 6.4
 coolWaterFR_Low = 6.8
 coolWaterFR_Up = 9
 
@@ -40,14 +40,16 @@ tempLab_Low = 270
 tempLab_Up = 280
 
 humLab = 30
-humLab_Low = 28
-humLab_Up = 29
+humLab_Low = 38
+humLab_Up = 39
 
 nitroTrapWght = 20
 nitroTrapWght_Low = 19
 nitroTrapWght_Up = 21
 
-Notes: 
+dataBWTDisChlTemp = 10
+
+Notes:
 
 chl1_Low - Lower Temperature Limit (K) of Channel 1 (PT2 Head)
 chl1_Up - Upper Temperature Limit (K) of Channel 1 (PT2 Head)
@@ -77,11 +79,11 @@ coolWaterFR - Cooling water flow rate (L/min)
 coolWaterFR_Low - Lower limit (L/min)
 coolWaterFR_Up - Upper limit (L/min)
 
-tempHeComp - Temp. (K) of He compressor 
-tempHeComp_Low - Lower Temp. Limit (K) 
-tempHeComp_up - Upper Temp. Limit (K) 
+tempHeComp - Temp. (K) of He compressor
+tempHeComp_Low - Lower Temp. Limit (K)
+tempHeComp_up - Upper Temp. Limit (K)
 
-tempLab - Temp. (K) of lab 
+tempLab - Temp. (K) of lab
 tempLab_Low - Lower Temp. Limit (K)
 tempLab_Up - Upper Temp. Limit (K)
 
@@ -92,3 +94,5 @@ humLab_Up - Upper Humidity Limit (%)
 nitroTrapWght - Weight of nitrogen trap (kg)
 nitroTrapWght_Low - Lower limit
 nitroTrapWght_Up - Upper limit
+
+dataBWTDisChlTemp - display every dataBWTDisChlTemp number of data points (starting from the most recent value) on the webpage channel temp. table
