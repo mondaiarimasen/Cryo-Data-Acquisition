@@ -27,7 +27,7 @@ chl7_Up = 300
 chl8_Low = 0.04
 chl8_Up = 300
 
-coolWaterFR = 6.398
+coolWaterFR = 6.9
 coolWaterFR_Low = 6.8
 coolWaterFR_Up = 9.0
 
@@ -47,7 +47,8 @@ nitroTrapWght = 20
 nitroTrapWght_Low = 19
 nitroTrapWght_Up = 21
 
-dataBWTDisChlTemp = 10
+dataBWTDisChlTemp = 11
+dataDisNum = 6
 
 Notes:
 
@@ -96,3 +97,4 @@ nitroTrapWght_Low - Lower limit
 nitroTrapWght_Up - Upper limit
 
 dataBWTDisChlTemp - display every dataBWTDisChlTemp number of data points (starting from the most recent value) on the webpage channel temp. table
+dataDisNum - how many rows of channel temp. displayed in the table on the HTML page
