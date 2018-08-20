@@ -1,6 +1,6 @@
 <!-- Victor Zhang, created August 14, 2018 -->
 <!-- Website to monitor all data recorded -->
-<!-- version 2.1.1-->
+<!-- version 2.2.0-->
 <!-- HTML&CSS -->
 
 <!DOCTYPE html>
@@ -337,6 +337,7 @@ function sendWarning(short, long, param, units, low, high){
    <img class = "center-fit" src='realTimeGraph-allChannels.png' />
   </div>
 
+    <!-- Temperature of Cryostat plots -->
  <div class = "imgRow">
    <div class="imgColumn">
    <div class="imgbox"><h2>PT1</h2></div>
@@ -364,6 +365,39 @@ function sendWarning(short, long, param, units, low, high){
   </div>
 </div>
   </div>
+
+<!-- Lab Temp, Pres, and Hum Plots -->
+
+ <div class = "imgRow">
+   <div class="imgColumn">
+   <div class="imgbox"><h2>Lab Temp (C)</h2></div>
+  <div class = "imgbox">
+   <img class = "center-fit" src='realTime-LabTemp.png' />
+  </div>
+
+<div class="imgbox"><h2>Lab Relative Hum. (%)</h2></div>
+  <div class = "imgbox">
+   <img class = "center-fit" src='realTime-LabHum.png' />
+  </div>
+</div>
+
+
+
+<div class="imgColumn">
+  <div class="imgbox"><h2>Lab Pressure (HPa) </h2></div>
+  <div class = "imgbox">
+   <img class = "center-fit" src='realTime-LabPres.png' />
+  </div>
+
+<div class="imgbox"><h2>mK</h2></div>
+  <div class = "imgbox">
+   <img class = "center-fit" src='realTime-MK.png' />
+  </div>
+</div>
+  </div>
+
+
+
 
   <b>mondaiarimasen</b>
 
