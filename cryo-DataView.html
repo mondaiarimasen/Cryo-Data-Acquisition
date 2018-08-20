@@ -1,6 +1,6 @@
 <!-- Victor Zhang, created August 14, 2018 -->
 <!-- Website to monitor all data recorded -->
-<!-- version 2.2.0-->
+<!-- version 2.2.1-->
 <!-- HTML&CSS -->
 
 <!DOCTYPE html>
@@ -87,6 +87,7 @@ var chlTemp_Low = [], // first element is lower temp. limit of chl 1, etc.
 var coolWaterFR, coolWaterFR_Low, coolWaterFR_Up,
     tempHeComp, tempHeComp_Low, tempHeComp_Up,
     tempLab, tempLab_Low, tempLab_Up,
+    presLab, presLab_Low, presLab_Up,
     humdLab, humdLab_Low, humdLab_Up,
     nitroTrapWght, nitroTrapWght_Low, nitroTrapWght_Up;
 
@@ -212,16 +213,20 @@ function environmentParams(){
             tempLab_Low = dat[26].substring(dat[26].indexOf("=")+1).replace(/\s/g,"");
             tempLab_Up = dat[27].substring(dat[27].indexOf("=")+1).replace(/\s/g,"");
 
-            humLab = dat[28].substring(dat[28].indexOf("=")+1).replace(/\s/g,"");
-            humLab_Low = dat[29].substring(dat[29].indexOf("=")+1).replace(/\s/g,"");
-            humLab_Up = dat[30].substring(dat[30].indexOf("=")+1).replace(/\s/g,"");
+            presLab = dat[28].substring(dat[28].indexOf("=")+1).replace(/\s/g,"");
+            presLab_Low = dat[29].substring(dat[29].indexOf("=")+1).replace(/\s/g,"");
+            presLab_Up = dat[30].substring(dat[30].indexOf("=")+1).replace(/\s/g,"");
 
-            nitroTrapWght = dat[31].substring(dat[31].indexOf("=")+1).replace(/\s/g,"");
-            nitroTrapWght_Low = dat[32].substring(dat[32].indexOf("=")+1).replace(/\s/g,"");
-            nitroTrapWght_Up = dat[33].substring(dat[33].indexOf("=")+1).replace(/\s/g,"");
+            humLab = dat[31].substring(dat[31].indexOf("=")+1).replace(/\s/g,"");
+            humLab_Low = dat[32].substring(dat[32].indexOf("=")+1).replace(/\s/g,"");
+            humLab_Up = dat[33].substring(dat[33].indexOf("=")+1).replace(/\s/g,"");
 
-            dataBWTDisChlTemp = dat[34].substring(dat[34].indexOf("=")+1).replace(/\s/g,"");
-            dataDisNum = dat[35].substring(dat[35].indexOf("=")+1).replace(/\s/g,"");
+            nitroTrapWght = dat[34].substring(dat[34].indexOf("=")+1).replace(/\s/g,"");
+            nitroTrapWght_Low = dat[35].substring(dat[35].indexOf("=")+1).replace(/\s/g,"");
+            nitroTrapWght_Up = dat[36].substring(dat[36].indexOf("=")+1).replace(/\s/g,"");
+
+            dataBWTDisChlTemp = dat[37].substring(dat[37].indexOf("=")+1).replace(/\s/g,"");
+            dataDisNum = dat[38].substring(dat[38].indexOf("=")+1).replace(/\s/g,"");
 
             for(i = 0; i < 8; i++){
                 chlTemp_Low[i] = dat[3+i*2].substring(dat[3+i*2].indexOf("=")+1).replace(/\s/g,"");
@@ -250,7 +255,14 @@ function environmentParams(){
             }
             else{
                 tempHumLine += '<span style = "color:red">' + tempLab + '</span>, ';
-                sendWarning('Temp. Lab', 'Temp. of Lab', tempLab, 'K', tempLab_Low, tempLab_Up);
+                sendWarning('Temp. Lab', 'Temp. of Lab', tempLab, 'C', tempLab_Low, tempLab_Up);
+            }
+            if (parseFloat(presLab) >= parseFloat(presLab_Low) && parseFloat(presLab) <= parseFloat(presLab_Up)){
+                tempHumLine += '<span style = "color:green">' + presLab + '</span>, ';
+            }
+            else{
+                tempHumLine += '<span style = "color:red">' + presLab + '</span>, ';
+                sendWarning('Temp. Lab', 'Pres. of Lab', presLab, 'hPa', presLab_Low, presLab_Up);
             }
             if (parseFloat(humLab) >= parseFloat(humLab_Low) && parseFloat(humLab) <= parseFloat(humLab_Up)){
                 tempHumLine += '<span style = "color:green">' + humLab + '</span>';
@@ -320,7 +332,7 @@ function sendWarning(short, long, param, units, low, high){
         <p id = "heCompTempEle"><p>
     </div>
     <div class = "EnvironColumn">
-        <h2 style="text-align:center;">Temp. (K), Hum. (%) of Lab</h2>
+        <h2 style="text-align:center;">Temp. (C), Pres (hPa), Rel. Hum. (%) of Lab</h2>
         <p id = "tempHumLabEle"><p>
     </div>
     <div class = "EnvironColumn">
@@ -384,7 +396,7 @@ function sendWarning(short, long, param, units, low, high){
 
 
 <div class="imgColumn">
-  <div class="imgbox"><h2>Lab Pressure (HPa) </h2></div>
+  <div class="imgbox"><h2>Lab Pressure (hPa) </h2></div>
   <div class = "imgbox">
    <img class = "center-fit" src='realTime-LabPres.png' />
   </div>
