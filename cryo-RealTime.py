@@ -1,6 +1,6 @@
 # Victor Zhang, created August 14, 2018
 # Real Time Temperature Acquisition from Lake Shore 372 device
-# version 3.1.0
+# version 3.2.0
 # Python
 
 ## imports ##
@@ -9,12 +9,13 @@ from datetime import datetime, timedelta
 import time
 import numpy as np
 import matplotlib.pyplot as plt
+import serial # used to read temperature, pressure, and relative humidity from serial port, send by Arduino
 
 ## Variables (change these as much as you like) ##
 brght = 1 # brightness of LS372 display; 0=25%, 1=50%, 2=75%, 3=100%
 date_time = "" # later holds current date and time 
 allTemp = "" # later holds all the temp readings
-sleepTime = 0.5 # how many seconds between temperature taking
+sleepTime = 10 # how many seconds between temperature taking
 stopDate = "2018-08-23" # write in %Y-%m-%d format, ex. 2018-08-16, or 2018-01-04, but NOT 18-8-6 NOR 18-1-4
 stopHour = 22 # what hour (in 24 hours) want to stop; ex. if want to stop at 10:00, then stopHour = 10; if want to stop at 19:00, then stopHour = 19; stopHour is an int, don't make it a string
 dataAmt = 1000000 # amount of data points you anticipate (or want); you will get this many temperature readings of each channel; check if this is enough to reach the desired stopDate and stopHour based on your sleepTime
@@ -27,18 +28,33 @@ ip_address = "192.168.0.12" # IP Address of LS372
 lsPort = 7777 # port that LS372 can only communicate with
 rdgst_dict = {"000":"Valid reading is present", "001":"CS OVL", "002":"VCM OVL", "004":"VMIX OVL", "008":"VDIF OVL", "016":"R. OVER", "032":"R. UNDER", "064":"T. OVER", "128":"T. UNDER"} # dictionary of RDGST readings and their meanings
 term = "\r\n" # terminator command for sending commands to LS372; this is what the manual refers to when it says "terminator"
+
 iterNum = 0 # not really constant, since the for loop below changes it, but the user should not change its value from 0
+
 totChannelNum = 8 # to avoid hardcoding in the number of channels
 channelNames = ["PT2 Head", "PT2 Plate", "1 K Plate", "Still", "mK Plate Cernox", "PT1 Head", "PT1 Plate", "mk Plate RuOx"] # first element is channel 1, etc
+
 graph_AllChannel_Name = 'realTimeGraph-allChannels.png' # image shows all the channels
 line_AllChannels = np.empty(totChannelNum,dtype='object') # holds the line objects for the 8 Channels (for plotting)
+
 colors = ['k-', 'r-', 'b-', 'y-', 'm-', 'c-', 'g-', 'ro-'] # colors used to color the 8 channels 
+
 graph_Special_Proxy = [7, 2, 3, 5] # which channels I am using to proxy the temp in the respective graph
 graph_Special_Name = ['realTime-PT1.png', 'realTime-PT2.png', 'realTime-1K.png', 'realTime-MK.png']
 fig_Special = np.empty(len(graph_Special_Name),dtype='object') # holds the figure objects for the special graphs (for plotting)
 ax_Special = np.empty(len(graph_Special_Name),dtype='object') # holds the axes objects for the special graphs (for plotting)
 line_Special = np.empty(len(graph_Special_Name),dtype='object') # holds the line objects for the special graphs (for plotting)
-file_Name = 'cryo-LS372-Temp.dat' ## Temperature from LS372 is saved to this file
+
+graph_TPH_Proxy = ["Temperature (C)", "Pressure (HPa)", "Humidity (%)"] # names of data value measured in respective graph
+graph_TPH_Name = ['realTime-LabTemp.png', 'realTime-LabPres.png', 'realTime-LabHum.png']
+fig_TPH = np.empty(len(graph_TPH_Name),dtype='object') # for lab temp, pres, and hum graphs
+ax_TPH = np.empty(len(graph_TPH_Name),dtype='object') 
+line_TPH = np.empty(len(graph_TPH_Name),dtype='object') 
+
+file_LS372Temp_Name = 'cryo-LS372-Temp.dat' ## Temperature from LS372 is saved to this file
+file_LabTPH_Name = 'cryo-Lab-TPH.dat' ## Temperature, Pressure, and Relative Humidity of the lab room is saved to this file
+
+labTPH = np.zeros((dataAmt,len(graph_TPH_Name))) # holds values of lab temp, pres, and hum
 chlTemp = np.zeros((dataAmt,totChannelNum)) + 300 # temp of 300K for all channels by default
 recTime = np.empty(dataAmt,dtype='object') # holds the x-axis time & date labels
 x = np.arange(dataAmt) # x values, from 0 to dataAmt-1, inclusive (in a bijective mapping to recTime elements)
@@ -95,9 +111,14 @@ else:
 ##################################################################
 
 ## Starting the data acquisition ##
-file = open(file_Name, 'w')
-file.write("Time,1,2,3,4,5,6,7,8,\n")
-file.close()
+file_LS372Temp = open(file_LS372Temp_Name, 'w')
+file_LS372Temp.write("Time,1,2,3,4,5,6,7,8,\n")
+file_LS372Temp.close()
+
+file_LabTPH = open(file_LabTPH_Name, 'w')
+file_LabTPH.write("Time,Temperature(C),Pressure(HPa),RelativeHumidity(%),\n")
+file_LabTPH.close()
+
 
 # sets up the x-axis time labels #
 def setTime():
@@ -113,29 +134,63 @@ def setTime():
         recTimeObj = datetime.strptime(recTime[i-1], '%Y-%m-%d %H:%M:%S') + timedelta(milliseconds = sleepTime*1000)
         recTime[i] = recTimeObj.strftime('%Y-%m-%d %H:%M:%S')
 
+# reads temperature, pressure, and relative humidity from Arduino, and records to file_LAabTPH_Name #
+def recTPH(time, i):
+    ser = serial.Serial()
+    ser.port = '/dev/ttyACM0'
+    ser.open()
+    serialOutput = ser.readline() 
+    serialOutput = serialOutput.rstrip()
+    outputArr = serialOutput.split(',')
+    comments = ""
+    print("TPH: %s,%s\n" % (len(serialOutput), serialOutput))
+    ser.close()
+    try:
+        for j in range(0,len(graph_TPH_Name)):
+            labTPH[i:i+1,j:j+1] = outputArr[j]
+    except Exception as e:
+        reg = [25.62,1012.02,62.00]
+        for j in range(0,len(graph_TPH_Name)):
+            labTPH[i:i+1,j:j+1] = reg[j]
+        comments += "Exception here: " + e + ","
+        
+    
+    file_LabTPH = open(file_LabTPH_Name, 'a')
+    file_LabTPH.write(time + "," + serialOutput + "," + comments + "\n")
+    file_LabTPH.close()    
+    
+
 # the combined graph, static
 fig_AllChannels = plt.figure(figsize=(15,8))
 ax_AllChannels = fig_AllChannels.add_subplot(1,1,1)
 ax_AllChannels.set_ylim([0,310])
 
+for i in range(0, len(colors)):
+    line_AllChannels[i], = ax_AllChannels.plot([], [], colors[i])
+
+# Special graphs #
 for i in range(0,len(graph_Special_Name)):
     fig_Special[i] = plt.figure(figsize=(15,8))
     ax_Special[i] = fig_Special[i].add_subplot(1,1,1)
     ax_Special[i].set_xlim([0,repeatlength])
 
+for i in range(0, len(graph_Special_Name)):
+    line_Special[i], = ax_Special[i].plot([], [], 'ro-')
+
+# TPH graph #
+for i in range(0,len(graph_TPH_Name)):
+    fig_TPH[i] = plt.figure(figsize=(15,8))
+    ax_TPH[i] = fig_TPH[i].add_subplot(1,1,1)
+    ax_TPH[i].set_xlim([0,repeatlength])
+
+for i in range(0, len(graph_TPH_Name)):
+    line_TPH[i], = ax_TPH[i].plot([], [], 'ro-')
 
 setTime()
 # for calibration/testing purposes
 date_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 print("date_time after fig, ax: %s\n" % date_time)
 
-for i in range(0, len(colors)):
-    line_AllChannels[i], = ax_AllChannels.plot([], [], colors[i])
-
-for i in range(0, len(graph_Special_Name)):
-    line_Special[i], = ax_Special[i].plot([], [], 'ro-')
-
-#ax.margins(5)
 
 print("while starting\n")
 while stopDate != date_time[:len(stopDate)] or stopHour != int(date_time[11:13]):
@@ -145,6 +200,8 @@ while stopDate != date_time[:len(stopDate)] or stopHour != int(date_time[11:13])
     print("iterNum: %s, date_time: %s" % (iterNum, date_time))
     print("Stopping on: %s at hour %s" % (stopDate, stopHour))
     allTemp = date_time + ","
+    
+    recTPH(date_time, iterNum) 
 
     print("Status and Reading of Thermometers:")
     for j in range(0,totChannelNum):
@@ -174,9 +231,9 @@ while stopDate != date_time[:len(stopDate)] or stopHour != int(date_time[11:13])
         allTemp += str(chlTemp[iterNum:iterNum+1,j:j+1][0][0]) + ","
     print("chlTemp[9:10,:]: %s" % chlTemp[9:10,:])
     print("allTemp: %s" % allTemp)
-    file = open(file_Name, 'a')
-    file.write(allTemp + "\n")
-    file.close()
+    file_LS372Temp = open(file_LS372Temp_Name, 'w')
+    file_LS372Temp.write(allTemp + "\n")
+    file_LS372Temp.close()
 
     ## Part 2: drawing the plot and saving the image ##
     
@@ -213,6 +270,28 @@ while stopDate != date_time[:len(stopDate)] or stopHour != int(date_time[11:13])
 
         print("plotting")
         ax_Special[j].set_title("Real Time Temperature of " + channelNames[graph_Special_Proxy[j]-1] + " (Channel " + str(graph_Special_Proxy[j]) + " is proxy)")
+        # below for loop makes the x-axis labels have a nice slant
+        for label in ax_Special[j].get_xmajorticklabels():
+            label.set_rotation(30)
+            label.set_horizontalalignment("right")
+
+    # Plotting TPH Graph #
+    print("In TPH")
+    for j in range(0,len(graph_TPH_Name)):
+        line_TPH[j].set_xdata(x[imin:iterNum])
+        line_TPH[j].set_ydata(labTPH[imin:iterNum,j:j+1])
+        ax_TPH[j].xaxis.set_ticks(x[imin:iterNum])
+        ax_TPH[j].set_xticklabels(recTime[imin:iterNum])#,rotation=deg) # can use this instead if don't like plt.gcf().autofmt_xdate() or label.set_rotation, but warning that rotation of any deg other than 90 can result in confusion, since the tick mark is centered on the horizontal projection of oblique tick label
+        ax_TPH[j].relim()
+        ax_TPH[j].autoscale()
+        if iterNum>repeatlength:
+            ax_TPH[j].set_xlim(iterNum-repeatlength,iterNum)
+        else:
+            ax_TPH[j].set_xlim(0,repeatlength)
+
+        print("plotting")
+        ax_TPH[j].set_title(graph_TPH_Proxy[j] + " of Lab")
+        ax_TPH[j].set_ylabel(graph_TPH_Proxy[j])
         # below for loop makes the x-axis labels have a nice slant
         for label in ax_Special[j].get_xmajorticklabels():
             label.set_rotation(30)
