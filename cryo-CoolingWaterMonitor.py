@@ -1,16 +1,15 @@
 # Victor Zhang, created August 15, 2018
 # Cooling Water Flow Rate monitor, by reading data through the LabJack U3-Lv
-# version 0.2.0
+# version 1.0.0
 # Python
 
 '''
 Program Details: 
 
 1. Measuring voltage from LabJack U3-LV through port FIO1
-    > voltage comes from water flow rate monitor, but we halve the voltage because the original voltage from the monitor is too high for the LabJack U3-LV to handle; FIO1 receives the halved voltage; see cryo-LabJackU3LV-setup.png
+    > voltage comes from water flow rate monitor, but we halve the voltage because the original voltage from the monitor is too high for the LabJack U3-LV to handle; FIO1 receives the halved voltage
 
-2. Converting voltage to flow rate using relationship determined experimentally: voltage = ((flow rate * 0.25) + 1) / 2
-    > or using flow rate = 4 * (2 * voltage - 1)
+2. Converting voltage to flow rate using relationship determined experimentally: voltage after halved = (flow rate * 0.119) + 0.5
 
 Notes: 
 
@@ -21,6 +20,10 @@ August 15, 2018, 16:26
     > Wire from water flow rate monitor is connected to FIO1
     > When nothing is connected to ports FIO0 and FIO1, FIO0 and FIO1 have almost exactly the same noise levels, except that of FIO0 = FIO1 + 0.01 (approximate, this was experimentally measured); FIO1 has noise of about 0.14
     > When FIO1 is connected to water flow rate monitor, the noise in FIO0 is measured to be about 0.33
+
+August 20, 2018, 19:37
+    > recalibrated formula by putting in new filter and measuring voltage at different flow rates; found new flow rate to voltage (after halved) relationship: voltage after halved = (flow rate * 0.119) + 0.5
+    > integrating this program with cryo-RealTime.py so that when we monitor the cryostat, we don't run several different Python programs at once
 
 '''
 
@@ -37,13 +40,13 @@ fileName = 'cryo-WaterMeas.dat' # name of file you want to save the calculated f
 flowRate = np.zeros(100000) # array to hold the calculated flow rate values 
 voltage = np.zeros(100000) 
 x = np.arange(100000)
-sleepTime = 1000*5 # how often to take samples
+sleepTime = 1000*1 # how often to take samples
 
 def update(i):
     #getAIN seems to be better than reading the bits and converting, since it automatically changes the bits to volts for you
     print("voltage at %s: %s vs %s\n" % (i,d.getAIN(1),d.getAIN(0)))
     voltage[i]=d.getAIN(1) 
-    flowRate[i] = 4 * (2 * voltage[i] - 1)
+    flowRate[i] = (voltage[i] - 0.5) / 0.119
     file.write("{:10.7f},\n".format(flowRate[i]))    
         
     # below live updates the coolWaterFR variable in cryo-Environment-Data.dat 
