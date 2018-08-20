@@ -27,7 +27,7 @@ chl7_Up = 300
 chl8_Low = 0.04
 chl8_Up = 300
 
-coolWaterFR = 6.9
+coolWaterFR = 7.918
 coolWaterFR_Low = 6.8
 coolWaterFR_Up = 9.0
 
@@ -35,9 +35,13 @@ tempHeComp = 278
 tempHeComp_Low = 277
 tempHeComp_Up = 280
 
-tempLab = 277
-tempLab_Low = 270
-tempLab_Up = 280
+tempLab = 25
+tempLab_Low = 23
+tempLab_Up = 30
+
+presLab = 1012
+presLab_Low = 900
+presLab_Up = 1200
 
 humLab = 30
 humLab_Low = 28
