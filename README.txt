@@ -25,6 +25,12 @@ I. Motivation
 *****************************************************************************
 II. Program Descriptions
 
+  - arduino_LabPTH/arduino_LabPTH.ino
+        > gets the lab temperature, pressure, and relative humidity from
+          connected Arduino device
+        > sends the data to serial port, which cryo-RealTime.py reads and 
+          updates to cryo-Environment-Data.dat
+
   - cryo-CoolingWaterMonitor.py
         > gets the cooling water flow rate by reading the voltage from the
           monitor through the LabJack U3-LV
@@ -33,6 +39,8 @@ II. Program Descriptions
         > no consideration of noise in current version
         > updates cryo-Environment-Data.dat with the new cooling water flow
           rate
+        > not used, as of August 20, 2018, as integrating with 
+          cryo-RealTime.py
 
   - cryo-DataView.html
         > website to view all data read by the programs
@@ -82,6 +90,11 @@ II. Program Descriptions
                 temp on HTML page)
               * dataDisNum (# of data rows in chl temp displayed)
 
+  - cryo-Lab-PTH.dat
+        > text file containing all lab temperature, pressrure, and relative 
+          humidity, as measured by Arduino device in one run
+        > most recent value is stored in cryo-Environment-Data.dat
+
   - cryo-LS372-Temp.dat
         > text file containing temperature readings of all 8 channels of the
           LS372 and time of measurement, over a period of time and frequency
@@ -98,6 +111,10 @@ II. Program Descriptions
           show most recent data; how recent is user-decided)
         > plots all 8 channels on static graph, and PT1,2, 1K plate, and mK
           plate temp. on separate shifting graphs
+        > plots lab temperature, pressure, and relative humidity, as 
+          measured by Arduino device; saves most recent data to 
+          cryo-Environment-Data.dat; logs all measured data in one run to 
+          cryo-Lab-PTH.dat
 
   - cryo-clientCooling.py
         > client side to socket communication to send live the flow rate to
