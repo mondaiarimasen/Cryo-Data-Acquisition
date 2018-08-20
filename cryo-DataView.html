@@ -1,6 +1,6 @@
 <!-- Victor Zhang, created August 14, 2018 -->
 <!-- Website to monitor all data recorded -->
-<!-- version 2.1.0-->
+<!-- version 2.1.1-->
 <!-- HTML&CSS -->
 
 <!DOCTYPE html>
@@ -24,6 +24,7 @@
     width:100%
     height: auto;
     border: 1px solid black;
+    text-align: center;
   }
   .center-fit {
     max-width: 100%;
@@ -132,7 +133,7 @@ function getTableText(csv){
     var printDat = "<tr><th>Time and Date</th>";
 
     for (i = 1; i<9; i++){
-      printDat += "<th>Channel " + i.toString() + "</th>";
+      printDat += "<th>Channel " + i.toString() + " (K)</th>";
     }
     printDat += "</tr><tr><th></th>";
 
@@ -338,21 +339,26 @@ function sendWarning(short, long, param, units, low, high){
 
  <div class = "imgRow">
    <div class="imgColumn">
+   <div class="imgbox"><h2>PT1</h2></div>
   <div class = "imgbox">
    <img class = "center-fit" src='realTime-PT1.png' />
   </div>
 
+<div class="imgbox"><h2>1K</h2></div>
   <div class = "imgbox">
    <img class = "center-fit" src='realTime-1K.png' />
   </div>
 </div>
 
 
-   <div class="imgRow">
+
+<div class="imgColumn">
+  <div class="imgbox"><h2>PT2</h2></div>
   <div class = "imgbox">
    <img class = "center-fit" src='realTime-PT2.png' />
   </div>
 
+<div class="imgbox"><h2>mK</h2></div>
   <div class = "imgbox">
    <img class = "center-fit" src='realTime-MK.png' />
   </div>
