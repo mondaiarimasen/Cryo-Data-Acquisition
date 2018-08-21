@@ -1,14 +1,13 @@
 <!-- Victor Zhang, created August 14, 2018 -->
 <!-- Website to monitor all data recorded -->
-<!-- version 3.0.0-->
+<!-- version 4.0.0-->
 <!-- HTML&CSS -->
 
 <!DOCTYPE html>
 <html>
 <head>
-<meta http-equiv="refresh" content="83"> <!-- content is how many frequently (in seconds) you want the page to refresh -->
-
-<style>
+   <meta http-equiv="refresh" content="83"> <!-- content is how many frequently (in seconds) you want the page to refresh -->
+   <style>
   .titleDiv{
     width: 100%;
     height: 1%;
@@ -65,105 +64,109 @@
     color: black;
     border:1px black solid;
   }
-</style>
+  </style>
 
-<!-- Following two Javascript scripts are needed to send email notifications / warnings if something goes wrong -->
-<!-- Using EmailJS.com to send emails; NOTE: Free Monthly Quota of 200 emails -->
-<!-- Please do not combine with "general" Javascript script below -->
-<script type="text/javascript" src="https://cdn.emailjs.com/sdk/2.2.4/email.min.js"></script>
-<script type="text/javascript">
+  <!-- Following two Javascript scripts are needed to send email notifications / warnings if something goes wrong -->
+  <!-- Using EmailJS.com to send emails; NOTE: Free Monthly Quota of 200 emails -->
+  <!-- Please do not combine with "general" Javascript script below -->
+  <script type="text/javascript" src="https://cdn.emailjs.com/sdk/2.2.4/email.min.js"></script>
+  <script type="text/javascript">
   (function(){
     //emailjs.init("<YOUR USER ID>"); // Uncomment this line to start the email notifications
   })();
-</script>
+  </script>
 
-<script>
-// General Javascript script (please do not combine above two scripts with this)
+  <script>
+  // General Javascript script (please do not combine above two scripts with this)
+  // Global variables
+  var chlTemp_Low = [], // first element is lower temp. limit of chl 1, etc.
+      chlTemp_Up = []; // first element is upper temp. limit of chl 1, etc.
 
-// Global variables
-var chlTemp_Low = [], // first element is lower temp. limit of chl 1, etc.
-    chlTemp_Up = []; // first element is upper temp. limit of chl 1, etc.
+  var coolWaterFR, coolWaterFR_Low, coolWaterFR_Up,
+      tempHeComp, tempHeComp_Low, tempHeComp_Up,
+      tempLab, tempLab_Low, tempLab_Up,
+      presLab, presLab_Low, presLab_Up,
+      humdLab, humdLab_Low, humdLab_Up,
+      nitroTrapWght, nitroTrapWght_Low, nitroTrapWght_Up;
 
-var coolWaterFR, coolWaterFR_Low, coolWaterFR_Up,
-    tempHeComp, tempHeComp_Low, tempHeComp_Up,
-    tempLab, tempLab_Low, tempLab_Up,
-    presLab, presLab_Low, presLab_Up,
-    humdLab, humdLab_Low, humdLab_Up,
-    nitroTrapWght, nitroTrapWght_Low, nitroTrapWght_Up;
+  var dataBWTDisChlTemp, dataDisNum;
 
-var dataBWTDisChlTemp, dataDisNum;
+  var channelNames = {
+    1: "PT2 Head",
+    2: "PT2 Plate",
+    3: "1 K Plate",
+    4: "Still",
+    5: "mK Plate Cernox",
+    6: "PT1 Head",
+    7: "PT1 Plate",
+    8: "mk Plate RuOx"
+  };
 
-var channelNames = {
-  1: "PT2 Head",
-  2: "PT2 Plate",
-  3: "1 K Plate",
-  4: "Still",
-  5: "mK Plate Cernox",
-  6: "PT1 Head",
-  7: "PT1 Plate",
-  8: "mk Plate RuOx"
-};
-
-// this is called every time the window loads / after every time I refresh the page
-window.onload=function(){
+  // this is called every time the window loads / after every time I refresh the page
+  window.onload=function(){
     with (new XMLHttpRequest()) {
-        onreadystatechange = environmentParams;
-        open('GET','cryo-Environment-Data.dat',true);
-        responseType='text';
-        send();
+      onreadystatechange = environmentParams;
+      open('GET','cryo-Environment-Data.dat',true);
+      responseType='text';
+      send();
     }
     with (new XMLHttpRequest()) {
-        onreadystatechange = tempTableWriter;
-        open('GET','cryo-LS372-Temp.dat',true);
-        responseType='text';
-        send();
+      onreadystatechange = tempTableWriter;
+      open('GET','cryo-LS372-Temp.dat',true);
+      responseType='text';
+      send();
     }
-}
+  }
 
-function tempTableWriter(){
+  // function that actually makes the channel temperature data table on the HTML page
+  function tempTableWriter(){
     if(this.readyState===4){
-        if(this.status === 200 || this.status === 0){
-            document.getElementById('LSTempTable').innerHTML = getTableText(this.responseText);
-        }
+      if(this.status === 200 || this.status === 0){
+        document.getElementById('LSTempTable').innerHTML = getTableText(this.responseText);
+      }
     }
-}
+  }
 
-function getTableText(csv){
+  // function that tells what to write to make the channel temperature data table on HTML page
+  function getTableText(csv){
     dat = csv.split('\n');
-    dat.shift() // gets rid of the first line of the document, which is the header, and has no data values
+    dat.shift() // removes the first line of the document (cryo-LS372-Temp.dat) from the dat array; first line is the header, and has no data values
     var printDat = "<tr><th>Time and Date</th>";
 
     for (i = 1; i<9; i++){
       printDat += "<th>Channel " + i.toString() + " (K)</th>";
     }
-    printDat += "</tr><tr><th></th>";
 
+    printDat += "</tr><tr><th></th>";
 
     for(i = 1; i<9; i++){
       printDat += "<th>" + channelNames[i] + "</th>";
     }
+
     printDat += "</tr>";
 
-		// Starts printing from the most recent data point (last row in the cryo-LS372-Temp.dat list)
+    // Starts printing from the most recent data point (last row in the cryo-LS372-Temp.dat list)
     // in the for loop below, i must start from dat.length-2, since dat.length-1 is an empty row (in realTime_my_socket.py, I add "\n" at the end of writing each row, and in dat = csv.split('\n') above, the separator is '\n', so the last element of dat (dat is an array, where each element is an entire row of cryo-LS372-Temp.dat) is empty
     if (dat.length < dataBWTDisChlTemp){
-        for (i=dat.length-2;i>=0; i--){
-            var tempRow = dat[i].split(',');
-            printDat+='<tr><td style = "text-align:center">' + tempRow[0] + '</td>';
-            for (j = 1; j < 9; j++){
-              if (parseFloat(tempRow[j]) >= chlTemp_Low[j-1] && parseFloat(tempRow[j])<=chlTemp_Up[j-1]){
-                printDat += '<td style = "text-align:center;color:green">' + tempRow[j] + '</td>';
-              }
-              else{
-                printDat += '<td style = "text-align:center;color:red">' + tempRow[j] + '</td>';
-                sendWarning(channelNames[j] + ' Temp.', channelNames[j] + ' (Chl ' + j.toString() + ') Temp.', tempRow[j], 'K', chlTemp_Low[j-1], chlTemp_Up[j-1]);
-              }
-            }
+      // displays in the table all the data measured so far
+      for (i=dat.length-2;i>=0; i--){
+        var tempRow = dat[i].split(',');
+        printDat+='<tr><td style = "text-align:center">' + tempRow[0] + '</td>';
+        for (j = 1; j < 9; j++){
+          if (parseFloat(tempRow[j]) >= chlTemp_Low[j-1] && parseFloat(tempRow[j])<=chlTemp_Up[j-1]){
+            printDat += '<td style = "text-align:center;color:green">' + tempRow[j] + '</td>';
+          }
+          else{
+            printDat += '<td style = "text-align:center;color:red">' + tempRow[j] + '</td>';
+            sendWarning(channelNames[j] + ' Temp.', channelNames[j] + ' (Chl ' + j.toString() + ') Temp.', tempRow[j], 'K', chlTemp_Low[j-1], chlTemp_Up[j-1]);
+          }
         }
-        printDat += "</tr>";
-        return printDat;
+      }
+      printDat += "</tr>";
+      return printDat;
     }
     else{
+      // displays in the table the most recent data, and every dataBWTDisChlTemp number before that until there are dataDisNum of rows or until you reach the beginning of the data file
       var count = 0;
       for (i=dat.length-2; i>=0 ; i = i - dataBWTDisChlTemp){
           if (count<dataDisNum){
@@ -187,231 +190,226 @@ function getTableText(csv){
       }
       return printDat;
     }
-}
+  }
 
-// sets the global variables, which are environment parameters, to their values from cryo-Environment-Data.dat
-function environmentParams(){
+  // sets the global variables, which are environment parameters, to their values from cryo-Environment-Data.dat
+  function environmentParams(){
     if(this.readyState===4){
-        if(this.status === 200 || this.status === 0){
-            dat = this.responseText.split('\n');
-            // Note: each line of cryo-Environment-Data.dat is an array element of dat
+      if(this.status === 200 || this.status === 0){
+        dat = this.responseText.split('\n');
+        // Note: each line of cryo-Environment-Data.dat is an array element of dat
 
-            // below line gets rid of any lines that are whitespaces or empty lines
-            dat = dat.filter(function(entry){return /\S/.test(entry);});
+        // below line gets rid of any lines that are whitespaces or empty lines
+        dat = dat.filter(function(entry){return /\S/.test(entry);});
 
-            // hopefully the hardcoded indices don't change; that would be a problem
-            // hardcoded indices are not good
-            coolWaterFR = dat[19].substring(dat[19].indexOf("=")+1).replace(/\s/g,"");
-            coolWaterFR_Low = dat[20].substring(dat[20].indexOf("=")+1).replace(/\s/g,"");
-            coolWaterFR_Up = dat[21].substring(dat[21].indexOf("=")+1).replace(/\s/g,"");
+        // hopefully the hardcoded indices don't change; that would be a problem
+        // hardcoded indices are not good - another method is needed to avoid them
+        coolWaterFR = dat[19].substring(dat[19].indexOf("=")+1).replace(/\s/g,"");
+        coolWaterFR_Low = dat[20].substring(dat[20].indexOf("=")+1).replace(/\s/g,"");
+        coolWaterFR_Up = dat[21].substring(dat[21].indexOf("=")+1).replace(/\s/g,"");
 
-            tempHeComp = dat[22].substring(dat[22].indexOf("=")+1).replace(/\s/g,"");
-            tempHeComp_Low = dat[23].substring(dat[23].indexOf("=")+1).replace(/\s/g,"");
-            tempHeComp_Up = dat[24].substring(dat[24].indexOf("=")+1).replace(/\s/g,"");
+        tempHeComp = dat[22].substring(dat[22].indexOf("=")+1).replace(/\s/g,"");
+        tempHeComp_Low = dat[23].substring(dat[23].indexOf("=")+1).replace(/\s/g,"");
+        tempHeComp_Up = dat[24].substring(dat[24].indexOf("=")+1).replace(/\s/g,"");
 
-            tempLab = dat[25].substring(dat[25].indexOf("=")+1).replace(/\s/g,"");
-            tempLab_Low = dat[26].substring(dat[26].indexOf("=")+1).replace(/\s/g,"");
-            tempLab_Up = dat[27].substring(dat[27].indexOf("=")+1).replace(/\s/g,"");
+        tempLab = dat[25].substring(dat[25].indexOf("=")+1).replace(/\s/g,"");
+        tempLab_Low = dat[26].substring(dat[26].indexOf("=")+1).replace(/\s/g,"");
+        tempLab_Up = dat[27].substring(dat[27].indexOf("=")+1).replace(/\s/g,"");
 
-            presLab = dat[28].substring(dat[28].indexOf("=")+1).replace(/\s/g,"");
-            presLab_Low = dat[29].substring(dat[29].indexOf("=")+1).replace(/\s/g,"");
-            presLab_Up = dat[30].substring(dat[30].indexOf("=")+1).replace(/\s/g,"");
+        presLab = dat[28].substring(dat[28].indexOf("=")+1).replace(/\s/g,"");
+        presLab_Low = dat[29].substring(dat[29].indexOf("=")+1).replace(/\s/g,"");
+        presLab_Up = dat[30].substring(dat[30].indexOf("=")+1).replace(/\s/g,"");
 
-            humLab = dat[31].substring(dat[31].indexOf("=")+1).replace(/\s/g,"");
-            humLab_Low = dat[32].substring(dat[32].indexOf("=")+1).replace(/\s/g,"");
-            humLab_Up = dat[33].substring(dat[33].indexOf("=")+1).replace(/\s/g,"");
+        humLab = dat[31].substring(dat[31].indexOf("=")+1).replace(/\s/g,"");
+        humLab_Low = dat[32].substring(dat[32].indexOf("=")+1).replace(/\s/g,"");
+        humLab_Up = dat[33].substring(dat[33].indexOf("=")+1).replace(/\s/g,"");
 
-            nitroTrapWght = dat[34].substring(dat[34].indexOf("=")+1).replace(/\s/g,"");
-            nitroTrapWght_Low = dat[35].substring(dat[35].indexOf("=")+1).replace(/\s/g,"");
-            nitroTrapWght_Up = dat[36].substring(dat[36].indexOf("=")+1).replace(/\s/g,"");
+        nitroTrapWght = dat[34].substring(dat[34].indexOf("=")+1).replace(/\s/g,"");
+        nitroTrapWght_Low = dat[35].substring(dat[35].indexOf("=")+1).replace(/\s/g,"");
+        nitroTrapWght_Up = dat[36].substring(dat[36].indexOf("=")+1).replace(/\s/g,"");
 
-            dataBWTDisChlTemp = dat[37].substring(dat[37].indexOf("=")+1).replace(/\s/g,"");
-            dataDisNum = dat[38].substring(dat[38].indexOf("=")+1).replace(/\s/g,"");
+        dataBWTDisChlTemp = dat[37].substring(dat[37].indexOf("=")+1).replace(/\s/g,"");
+        dataDisNum = dat[38].substring(dat[38].indexOf("=")+1).replace(/\s/g,"");
 
-            for(i = 0; i < 8; i++){
-                chlTemp_Low[i] = dat[3+i*2].substring(dat[3+i*2].indexOf("=")+1).replace(/\s/g,"");
-                chlTemp_Up[i] = dat[4+i*2].substring(dat[4+i*2].indexOf("=")+1).replace(/\s/g,"");
-            }
-
-            if (parseFloat(coolWaterFR) >= parseFloat(coolWaterFR_Low) && parseFloat(coolWaterFR) <= parseFloat(coolWaterFR_Up)){
-                document.getElementById('coolWaterFREle').innerHTML = '<h3 style = "text-align:center;color:green">' + coolWaterFR + '</h3>';
-            }
-            else{
-                document.getElementById('coolWaterFREle').innerHTML = '<h3 style = "text-align:center;color:red">' + coolWaterFR + '</h3>';
-                sendWarning('Flow Rate', 'Cooling Water Flow Rate', coolWaterFR, 'L/min', coolWaterFR_Low, coolWaterFR_Up);
-            }
-
-            if (parseFloat(tempHeComp) >= parseFloat(tempHeComp_Low) && parseFloat(tempHeComp) <= parseFloat(tempHeComp_Up)){
-                document.getElementById('heCompTempEle').innerHTML = '<h3 style = "text-align:center;color:green">' + tempHeComp + '</h3>';
-            }
-            else{
-                document.getElementById('heCompTempEle').innerHTML = '<h3 style = "text-align:center;color:red">' + tempHeComp + '</h3>';
-                sendWarning('Temp. He Comp.', 'Temp. He Comp.', tempHeComp, 'K', tempHeComp_Low, tempHeComp_Up);
-            }
-
-            var tempHumLine = '<h3 style = "text-align:center">';
-            if (parseFloat(tempLab) >= parseFloat(tempLab_Low) && parseFloat(tempLab) <= parseFloat(tempLab_Up)){
-                tempHumLine += '<span style = "color:green">' + tempLab + '</span>, ';
-            }
-            else{
-                tempHumLine += '<span style = "color:red">' + tempLab + '</span>, ';
-                sendWarning('Temp. Lab', 'Temp. of Lab', tempLab, 'C', tempLab_Low, tempLab_Up);
-            }
-            if (parseFloat(presLab) >= parseFloat(presLab_Low) && parseFloat(presLab) <= parseFloat(presLab_Up)){
-                tempHumLine += '<span style = "color:green">' + presLab + '</span>, ';
-            }
-            else{
-                tempHumLine += '<span style = "color:red">' + presLab + '</span>, ';
-                sendWarning('Temp. Lab', 'Pres. of Lab', presLab, 'hPa', presLab_Low, presLab_Up);
-            }
-            if (parseFloat(humLab) >= parseFloat(humLab_Low) && parseFloat(humLab) <= parseFloat(humLab_Up)){
-                tempHumLine += '<span style = "color:green">' + humLab + '</span>';
-            }
-            else{
-                tempHumLine += '<span style = "color:red">' + humLab + '</span>';
-                sendWarning('Hum. Lab', 'Humidity of Lab', humLab, '%', humLab_Low, humLab_Up);
-            }
-
-            tempHumLine += "</h3>";
-            document.getElementById('tempHumLabEle').innerHTML = tempHumLine;
-
-            if (parseFloat(nitroTrapWght) >= parseFloat(nitroTrapWght_Low) && parseFloat(nitroTrapWght) <= parseFloat(nitroTrapWght_Up)){
-                document.getElementById('nitroTrapEle').innerHTML = '<h3 style = "text-align:center;color:green">' + nitroTrapWght + '</h3>';
-            }
-            else{
-                document.getElementById('nitroTrapEle').innerHTML = '<h3 style = "text-align:center;color:red">' + nitroTrapWght + '</h3>';
-                sendWarning('Wght N2 Trap', 'Weight of N2 Trap', nitroTrapWght, 'kg', nitroTrapWght_Low, nitroTrapWght_Up);
-            }
-
+        // setting the lower and upper limits of the channel temperatures
+        for(i = 0; i < 8; i++){
+          chlTemp_Low[i] = dat[3+i*2].substring(dat[3+i*2].indexOf("=")+1).replace(/\s/g,"");
+          chlTemp_Up[i] = dat[4+i*2].substring(dat[4+i*2].indexOf("=")+1).replace(/\s/g,"");
         }
+
+        // Below if-else statements display specified environment parameters on the HTML page, with color coding (green for in the acceptable limits; red for out of the limits, and sends email, if capability is activated)
+
+        // cooling water flow rate
+        if (parseFloat(coolWaterFR) >= parseFloat(coolWaterFR_Low) && parseFloat(coolWaterFR) <= parseFloat(coolWaterFR_Up)){
+          document.getElementById('coolWaterFREle').innerHTML = '<h3 style = "text-align:center;color:green">' + coolWaterFR + '</h3>';
+        }
+        else{
+          document.getElementById('coolWaterFREle').innerHTML = '<h3 style = "text-align:center;color:red">' + coolWaterFR + '</h3>';
+          sendWarning('Flow Rate', 'Cooling Water Flow Rate', coolWaterFR, 'L/min', coolWaterFR_Low, coolWaterFR_Up);
+        }
+
+        // temp of He compressor
+        if (parseFloat(tempHeComp) >= parseFloat(tempHeComp_Low) && parseFloat(tempHeComp) <= parseFloat(tempHeComp_Up)){
+          document.getElementById('heCompTempEle').innerHTML = '<h3 style = "text-align:center;color:green">' + tempHeComp + '</h3>';
+        }
+        else{
+          document.getElementById('heCompTempEle').innerHTML = '<h3 style = "text-align:center;color:red">' + tempHeComp + '</h3>';
+          sendWarning('Temp. He Comp.', 'Temp. He Comp.', tempHeComp, 'K', tempHeComp_Low, tempHeComp_Up);
+        }
+
+        // temp., pres., and rel. hum. of lab
+        var tempHumLine = '<h3 style = "text-align:center">';
+        if (parseFloat(tempLab) >= parseFloat(tempLab_Low) && parseFloat(tempLab) <= parseFloat(tempLab_Up)){
+          tempHumLine += '<span style = "color:green">' + tempLab + '</span>, ';
+        }
+        else{
+          tempHumLine += '<span style = "color:red">' + tempLab + '</span>, ';
+          sendWarning('Temp. Lab', 'Temp. of Lab', tempLab, 'C', tempLab_Low, tempLab_Up);
+        }
+        if (parseFloat(presLab) >= parseFloat(presLab_Low) && parseFloat(presLab) <= parseFloat(presLab_Up)){
+          tempHumLine += '<span style = "color:green">' + presLab + '</span>, ';
+        }
+        else{
+          tempHumLine += '<span style = "color:red">' + presLab + '</span>, ';
+          sendWarning('Pres. Lab', 'Pres. of Lab', presLab, 'hPa', presLab_Low, presLab_Up);
+        }
+        if (parseFloat(humLab) >= parseFloat(humLab_Low) && parseFloat(humLab) <= parseFloat(humLab_Up)){
+          tempHumLine += '<span style = "color:green">' + humLab + '</span>';
+        }
+        else{
+          tempHumLine += '<span style = "color:red">' + humLab + '</span>';
+          sendWarning('Hum. Lab', 'Humidity of Lab', humLab, '%', humLab_Low, humLab_Up);
+        }
+
+        tempHumLine += "</h3>";
+        document.getElementById('tempHumLabEle').innerHTML = tempHumLine;
+
+        // nitrogen trap weight
+        if (parseFloat(nitroTrapWght) >= parseFloat(nitroTrapWght_Low) && parseFloat(nitroTrapWght) <= parseFloat(nitroTrapWght_Up)){
+          document.getElementById('nitroTrapEle').innerHTML = '<h3 style = "text-align:center;color:green">' + nitroTrapWght + '</h3>';
+        }
+        else{
+          document.getElementById('nitroTrapEle').innerHTML = '<h3 style = "text-align:center;color:red">' + nitroTrapWght + '</h3>';
+          sendWarning('Wght N2 Trap', 'Weight of N2 Trap', nitroTrapWght, 'kg', nitroTrapWght_Low, nitroTrapWght_Up);
+        }
+      }
     }
+  }
 
-}
+  // method called to send email warnings in case a value is out of its acceptable limits
+  function sendWarning(short, long, param, units, low, high){
+    var templateParams = {
+      issue_Short: short,
+      issue_Long: long,
+      issueParam: param,
+      issueUnits: units,
+      lowerLimit: low,
+      upperLimit: high,
+      };
+    emailjs.send('<YOUR SERVICE ID>', '<YOUR TEMPLATE ID>', templateParams).then( // replace parameters when you want to activate the email notification system
+      function(response) {
+        console.log('SUCCESS!', response.status, response.text); // I have not seen where this is printed, but I kept this code because it was on EmailJS.com
+      }, function(error) {
+        console.log('FAILED...', error);
+      });
+  }
+  </script>
 
-// method called to send email warnings in case a value is out of its acceptable limits
-function sendWarning(short, long, param, units, low, high){
-  var templateParams = {
-    issue_Short: short,
-    issue_Long: long,
-    issueParam: param,
-    issueUnits: units,
-    lowerLimit: low,
-    upperLimit: high,
-    };
-  emailjs.send('<YOUR SERVICE ID>', '<YOUR TEMPLATE ID>', templateParams).then(
-    function(response) {
-      console.log('SUCCESS!', response.status, response.text);
-    }, function(error) {
-      console.log('FAILED...', error);
-    });
-}
-
-
-</script>
-
-
-<title>Data Acquisition Page </title>
+  <!-- text in next line is displayed in the tab of the browser-->
+  <title>Data Acquisition Page </title>
 
 </head>
-
 <body>
-
   <div class = "titleDiv">
     <h1>Cryostat Data Acquisition and Monitoring Page</h1>
   </div>
 
 
-
+ <!-- row of environment parameters: cooling water flow rate, temp. of He compressor, lab temp., pres., and rel. hum., and weight of N2 trap -->
  <div class = "EnvironRow">
-    <div class = "EnvironColumn">
-        <h2 style="text-align:center;">Cooling Water Flow Rate (L/min)</h2>
-        <p id = "coolWaterFREle"><p>
-    </div>
-    <div class = "EnvironColumn">
-        <h2 style="text-align:center;">Temp. of He Compressor (K)</h2>
-        <p id = "heCompTempEle"><p>
-    </div>
-    <div class = "EnvironColumn">
-        <h2 style="text-align:center;">Temp. (C), Pres (hPa), Rel. Hum. (%) of Lab</h2>
-        <p id = "tempHumLabEle"><p>
-    </div>
-    <div class = "EnvironColumn">
-        <h2 style="text-align:center;">Weight (kg) of N2 Trap</h2>
-        <p id = "nitroTrapEle"><p>
-    </div>
-  </div>
+   <div class = "EnvironColumn">
+     <h2 style="text-align:center;">Cooling Water Flow Rate (L/min)</h2>
+     <p id = "coolWaterFREle"><p>
+   </div>
+   <div class = "EnvironColumn">
+     <h2 style="text-align:center;">Temp. of He Compressor (K)</h2>
+     <p id = "heCompTempEle"><p>
+   </div>
+   <div class = "EnvironColumn">
+     <h2 style="text-align:center;">Temp. (C), Pres (hPa), Rel. Hum. (%) of Lab</h2>
+     <p id = "tempHumLabEle"><p>
+   </div>
+   <div class = "EnvironColumn">
+     <h2 style="text-align:center;">Weight (kg) of N2 Trap</h2>
+     <p id = "nitroTrapEle"><p>
+   </div>
+ </div>
 
-  <div class = "LSTempDiv">
-    <table id = "LSTempTable" style="width:100%;text-align:center;"></table>
-  </div>
+ <!-- Table that displays temperature of all channels -->
+ <div class = "LSTempDiv">
+   <table id = "LSTempTable" style="width:100%;text-align:center;"></table>
+ </div>
 
-  <div class = "imgbox">
+ <!-- image of static plot of temperature of all channels vs time -->
+ <div class = "imgbox">
    <img class = "center-fit" src='realTime-allChannels.png' />
-  </div>
+ </div>
 
-    <!-- Temperature of Cryostat plots -->
+ <!-- Temperature of Cryostat plots: PT1, PT2, 1K, and mK plates -->
  <div class = "imgRow">
    <div class="imgColumn">
-   <div class="imgbox"><h2>PT1</h2></div>
-  <div class = "imgbox">
-   <img class = "center-fit" src='realTime-PT1.png' />
-  </div>
+     <div class="imgbox"><h2>PT1</h2></div>
+     <div class = "imgbox">
+       <img class = "center-fit" src='realTime-PT1.png' />
+     </div>
 
-<div class="imgbox"><h2>1K</h2></div>
-  <div class = "imgbox">
-   <img class = "center-fit" src='realTime-1K.png' />
-  </div>
-</div>
+     <div class="imgbox"><h2>1K</h2></div>
+     <div class = "imgbox">
+       <img class = "center-fit" src='realTime-1K.png' />
+     </div>
+   </div>
 
+   <div class="imgColumn">
+     <div class="imgbox"><h2>PT2</h2></div>
+     <div class = "imgbox">
+       <img class = "center-fit" src='realTime-PT2.png' />
+     </div>
 
+     <div class="imgbox"><h2>mK</h2></div>
+     <div class = "imgbox">
+       <img class = "center-fit" src='realTime-MK.png' />
+     </div>
+   </div>
+ </div> <!-- end of Temperature of Cryostat plots row -->
 
-<div class="imgColumn">
-  <div class="imgbox"><h2>PT2</h2></div>
-  <div class = "imgbox">
-   <img class = "center-fit" src='realTime-PT2.png' />
-  </div>
-
-<div class="imgbox"><h2>mK</h2></div>
-  <div class = "imgbox">
-   <img class = "center-fit" src='realTime-MK.png' />
-  </div>
-</div>
-  </div>
-
-<!-- Lab Temp, Pres, and Hum Plots -->
-
+ <!-- Lab Temp., Pres., and Hum., and Cooling Water Flow Rate Plots -->
  <div class = "imgRow">
    <div class="imgColumn">
-   <div class="imgbox"><h2>Lab Temp (C)</h2></div>
-  <div class = "imgbox">
-   <img class = "center-fit" src='realTime-LabTemp.png' />
-  </div>
+     <div class="imgbox"><h2>Lab Temp (C)</h2></div>
+     <div class = "imgbox">
+       <img class = "center-fit" src='realTime-LabTemp.png' />
+     </div>
 
-<div class="imgbox"><h2>Lab Relative Hum. (%)</h2></div>
-  <div class = "imgbox">
-   <img class = "center-fit" src='realTime-LabHum.png' />
-  </div>
-</div>
+     <div class="imgbox"><h2>Lab Relative Hum. (%)</h2></div>
+     <div class = "imgbox">
+       <img class = "center-fit" src='realTime-LabHum.png' />
+     </div>
+   </div>
 
+   <div class="imgColumn">
+     <div class="imgbox"><h2>Lab Pressure (hPa) </h2></div>
+     <div class = "imgbox">
+       <img class = "center-fit" src='realTime-LabPres.png' />
+     </div>
 
+     <div class="imgbox"><h2>Cooling Water Flow Rate</h2></div>
+     <div class = "imgbox">
+       <img class = "center-fit" src='realTime-WaterFR.png' />
+     </div>
+   </div>
+ </div> <!-- end of Lab Temp., Pres., and Hum., and Cooling Water Flow Rate row -->
 
-<div class="imgColumn">
-  <div class="imgbox"><h2>Lab Pressure (hPa) </h2></div>
-  <div class = "imgbox">
-   <img class = "center-fit" src='realTime-LabPres.png' />
-  </div>
+ <b>mondaiarimasen</b> <!-- my signature :) -->
 
-<div class="imgbox"><h2>Cooling Water Flow Rate</h2></div>
-  <div class = "imgbox">
-   <img class = "center-fit" src='realTime-WaterFR.png' />
-  </div>
-</div>
-  </div>
-
-
-
-
-  <b>mondaiarimasen</b>
-
-</body>
+ </body>
 </html>
