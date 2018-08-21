@@ -1,6 +1,6 @@
 # Victor Zhang, created August 14, 2018
 # Real Time Temperature Acquisition from Lake Shore 372 device
-# version 3.2.0
+# version 4.0.0
 # Python
 
 ## imports ##
@@ -10,13 +10,14 @@ import time
 import numpy as np
 import matplotlib.pyplot as plt
 import serial # used to read temperature, pressure, and relative humidity from serial port, send by Arduino
+import u3 # needed to monitor cooling water (for LabJack U3-LV)
 
 ## Variables (change these as much as you like) ##
 brght = 1 # brightness of LS372 display; 0=25%, 1=50%, 2=75%, 3=100%
 date_time = "" # later holds current date and time 
 allTemp = "" # later holds all the temp readings
-sleepTime = 10 # how many seconds between temperature taking
-stopDate = "2018-08-23" # write in %Y-%m-%d format, ex. 2018-08-16, or 2018-01-04, but NOT 18-8-6 NOR 18-1-4
+sleepTime = 80 # how many seconds between temperature taking; NOTE: the program default adds 10 seconds between measured times; e.g. if you want to measure data every 90 secs, set sleepTime = 80
+stopDate = "2018-08-24" # write in %Y-%m-%d format, ex. 2018-08-16, or 2018-01-04, but NOT 18-8-6 NOR 18-1-4
 stopHour = 22 # what hour (in 24 hours) want to stop; ex. if want to stop at 10:00, then stopHour = 10; if want to stop at 19:00, then stopHour = 19; stopHour is an int, don't make it a string
 dataAmt = 1000000 # amount of data points you anticipate (or want); you will get this many temperature readings of each channel; check if this is enough to reach the desired stopDate and stopHour based on your sleepTime
 repeatlength = 20 # how many points on the x-axis you want
@@ -34,7 +35,7 @@ iterNum = 0 # not really constant, since the for loop below changes it, but the 
 totChannelNum = 8 # to avoid hardcoding in the number of channels
 channelNames = ["PT2 Head", "PT2 Plate", "1 K Plate", "Still", "mK Plate Cernox", "PT1 Head", "PT1 Plate", "mk Plate RuOx"] # first element is channel 1, etc
 
-graph_AllChannel_Name = 'realTimeGraph-allChannels.png' # image shows all the channels
+graph_AllChannel_Name = 'realTime-allChannels.png' # image shows all the channels
 line_AllChannels = np.empty(totChannelNum,dtype='object') # holds the line objects for the 8 Channels (for plotting)
 
 colors = ['k-', 'r-', 'b-', 'y-', 'm-', 'c-', 'g-', 'ro-'] # colors used to color the 8 channels 
@@ -51,9 +52,13 @@ fig_TPH = np.empty(len(graph_TPH_Name),dtype='object') # for lab temp, pres, and
 ax_TPH = np.empty(len(graph_TPH_Name),dtype='object') 
 line_TPH = np.empty(len(graph_TPH_Name),dtype='object') 
 
+graph_WaterFR_Name = 'realTime-WaterFR.png' # image show the water flow rate over time
+
 file_LS372Temp_Name = 'cryo-LS372-Temp.dat' ## Temperature from LS372 is saved to this file
 file_LabTPH_Name = 'cryo-Lab-TPH.dat' ## Temperature, Pressure, and Relative Humidity of the lab room is saved to this file
+file_WaterFR_Name = 'cryo-WaterMeas.dat' # calculated flow rate values saved here
 
+waterFR = np.zeros(dataAmt,dtype=float)
 labTPH = np.zeros((dataAmt,len(graph_TPH_Name))) # holds values of lab temp, pres, and hum
 chlTemp = np.zeros((dataAmt,totChannelNum)) + 300 # temp of 300K for all channels by default
 recTime = np.empty(dataAmt,dtype='object') # holds the x-axis time & date labels
@@ -119,6 +124,9 @@ file_LabTPH = open(file_LabTPH_Name, 'w')
 file_LabTPH.write("Time,Temperature(C),Pressure(HPa),RelativeHumidity(%),\n")
 file_LabTPH.close()
 
+file_WaterFR = open(file_WaterFR_Name, 'w')
+file_WaterFR.write("Time,WaterFlowRate(L/min),\n")
+file_WaterFR.close()
 
 # sets up the x-axis time labels #
 def setTime():
@@ -134,8 +142,9 @@ def setTime():
         recTimeObj = datetime.strptime(recTime[i-1], '%Y-%m-%d %H:%M:%S') + timedelta(milliseconds = sleepTime*1000)
         recTime[i] = recTimeObj.strftime('%Y-%m-%d %H:%M:%S')
 
-# reads temperature, pressure, and relative humidity from Arduino, and records to file_LAabTPH_Name #
+# reads temperature, pressure, and relative humidity from Arduino, and records to file_LabTPH_Name #
 def recTPH(time, i):
+    print("in recTPH")
     ser = serial.Serial()
     ser.port = '/dev/ttyACM0'
     ser.open()
@@ -152,14 +161,48 @@ def recTPH(time, i):
         reg = [25.62,1012.02,62.00]
         for j in range(0,len(graph_TPH_Name)):
             labTPH[i:i+1,j:j+1] = reg[j]
-        comments += "Exception here: " + e + ","
+        comments += "Exception here: " + str(e) + ","
         
     
     file_LabTPH = open(file_LabTPH_Name, 'a')
     file_LabTPH.write(time + "," + serialOutput + "," + comments + "\n")
-    file_LabTPH.close()    
-    
+    file_LabTPH.close()
 
+    with open('cryo-Environment-Data.dat','r') as environ:
+        data = environ.readlines() 
+
+    for j in range(0, len(graph_TPH_Name)):
+        data[37+j*4] = data[37+j*4][:data[37+j*4].index("=")+1] + " " + "{:3.2f}\n".format(labTPH[i:i+1,j:j+1][0][0])
+
+    with open('cryo-Environment-Data.dat','w') as environ:
+        environ.writelines(data)
+    print("exiting recTPH")
+
+   
+def getWaterFR(time, i):
+    print("in getWaterFR")
+    d = u3.U3()
+    d.debug = True
+    d.getCalibrationData()
+    d.configIO(FIOAnalog = 15)
+    voltage = d.getAIN(1)
+    waterFR[i] = (voltage - 0.5) / 0.119
+    d.close()
+
+    file_WaterFR = open(file_WaterFR_Name, 'a')
+    file_WaterFR.write(time + "," + "{:5.3f},\n".format(waterFR[i]))
+    file_WaterFR.close()
+
+    with open('cryo-Environment-Data.dat','r') as environ:
+        data = environ.readlines() 
+
+    data[29] = data[29][:data[29].index("=")+1] + " " + "{:5.3f}\n".format(waterFR[i])
+
+    with open('cryo-Environment-Data.dat','w') as environ:
+        environ.writelines(data)
+    print("exiting getWaterFR")
+    
+## Starting the Figures ## 
 # the combined graph, static
 fig_AllChannels = plt.figure(figsize=(15,8))
 ax_AllChannels = fig_AllChannels.add_subplot(1,1,1)
@@ -175,7 +218,7 @@ for i in range(0,len(graph_Special_Name)):
     ax_Special[i].set_xlim([0,repeatlength])
 
 for i in range(0, len(graph_Special_Name)):
-    line_Special[i], = ax_Special[i].plot([], [], 'ro-')
+    line_Special[i], = ax_Special[i].plot([], [], 'ko-')
 
 # TPH graph #
 for i in range(0,len(graph_TPH_Name)):
@@ -184,14 +227,22 @@ for i in range(0,len(graph_TPH_Name)):
     ax_TPH[i].set_xlim([0,repeatlength])
 
 for i in range(0, len(graph_TPH_Name)):
-    line_TPH[i], = ax_TPH[i].plot([], [], 'ro-')
+    line_TPH[i], = ax_TPH[i].plot([], [], 'ko-')
 
+# WaterFR graph #
+fig_WaterFR = plt.figure(figsize=(15,8))
+ax_WaterFR = fig_WaterFR.add_subplot(1,1,1)
+ax_WaterFR.set_xlim([0,repeatlength])
+line_WaterFR, = ax_WaterFR.plot([],[],'ko-')
+
+## End of initializing Figures ##
+## Getting time ready ##
 setTime()
 # for calibration/testing purposes
 date_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 print("date_time after fig, ax: %s\n" % date_time)
 
-
+## Starting Data Collection ##
 print("while starting\n")
 while stopDate != date_time[:len(stopDate)] or stopHour != int(date_time[11:13]):
 
@@ -201,7 +252,8 @@ while stopDate != date_time[:len(stopDate)] or stopHour != int(date_time[11:13])
     print("Stopping on: %s at hour %s" % (stopDate, stopHour))
     allTemp = date_time + ","
     
-    recTPH(date_time, iterNum) 
+    recTPH(date_time, iterNum)
+    getWaterFR(date_time, iterNum)
 
     print("Status and Reading of Thermometers:")
     for j in range(0,totChannelNum):
@@ -231,7 +283,7 @@ while stopDate != date_time[:len(stopDate)] or stopHour != int(date_time[11:13])
         allTemp += str(chlTemp[iterNum:iterNum+1,j:j+1][0][0]) + ","
     print("chlTemp[9:10,:]: %s" % chlTemp[9:10,:])
     print("allTemp: %s" % allTemp)
-    file_LS372Temp = open(file_LS372Temp_Name, 'w')
+    file_LS372Temp = open(file_LS372Temp_Name, 'a')
     file_LS372Temp.write(allTemp + "\n")
     file_LS372Temp.close()
 
@@ -246,7 +298,9 @@ while stopDate != date_time[:len(stopDate)] or stopHour != int(date_time[11:13])
     ax_AllChannels.xaxis.set_ticks(x[:iterNum:staticXInt])
     ax_AllChannels.set_xticklabels(recTime[:iterNum:staticXInt])#,rotation=deg) # can use this instead if don't like plt.gcf().autofmt_xdate() or label.set_rotation below, but warning that rotation of any deg other than 90 can result in confusion, since the tick mark is centered on the horizontal projection of oblique tick label
     ax_AllChannels.set_xlim(0,iterNum)
+    print("plotting AllChannels")
     ax_AllChannels.set_title("Real Time Temperature of All Channels of Cryostat - Static")
+    ax_AllChannels.set_ylabel("Temperature (K)")
     ax_AllChannels.legend(channelNames,loc=2, bbox_to_anchor=(0.80, 0.9),fancybox=False, shadow=False, ncol=1)
     # below for loop makes the x-axis labels have a nice slant
     for label in ax_AllChannels.get_xmajorticklabels():
@@ -268,8 +322,9 @@ while stopDate != date_time[:len(stopDate)] or stopHour != int(date_time[11:13])
         else:
             ax_Special[j].set_xlim(0,repeatlength)
 
-        print("plotting")
+        print("plotting Special")
         ax_Special[j].set_title("Real Time Temperature of " + channelNames[graph_Special_Proxy[j]-1] + " (Channel " + str(graph_Special_Proxy[j]) + " is proxy)")
+        ax_Special[j].set_ylabel("Temperature (K)")
         # below for loop makes the x-axis labels have a nice slant
         for label in ax_Special[j].get_xmajorticklabels():
             label.set_rotation(30)
@@ -289,27 +344,53 @@ while stopDate != date_time[:len(stopDate)] or stopHour != int(date_time[11:13])
         else:
             ax_TPH[j].set_xlim(0,repeatlength)
 
-        print("plotting")
+        print("plotting TPH")
         ax_TPH[j].set_title(graph_TPH_Proxy[j] + " of Lab")
         ax_TPH[j].set_ylabel(graph_TPH_Proxy[j])
         # below for loop makes the x-axis labels have a nice slant
-        for label in ax_Special[j].get_xmajorticklabels():
+        for label in ax_TPH[j].get_xmajorticklabels():
             label.set_rotation(30)
             label.set_horizontalalignment("right")
 
+    # Plotting WaterFR Graph #
+    print("In WaterFR")
+    line_WaterFR.set_xdata(x[imin:iterNum])
+    line_WaterFR.set_ydata(waterFR[imin:iterNum])
+    ax_WaterFR.xaxis.set_ticks(x[imin:iterNum])
+    ax_WaterFR.set_xticklabels(recTime[imin:iterNum])#,rotation=deg) # can use this instead if don't like plt.gcf().autofmt_xdate() or label.set_rotation, but warning that rotation of any deg other than 90 can result in confusion, since the tick mark is centered on the horizontal projection of oblique tick label
+    ax_WaterFR.relim()
+    ax_WaterFR.autoscale()
+    if iterNum>repeatlength:
+        ax_WaterFR.set_xlim(iterNum-repeatlength,iterNum)
+    else:
+        ax_WaterFR.set_xlim(0,repeatlength)
+
+    print("plotting WaterFR")
+    ax_WaterFR.set_title("Cooling Water Flow Rate")
+    ax_WaterFR.set_ylabel("Flow Rate (L/min)")
+    # below for loop makes the x-axis labels have a nice slant
+    for label in ax_WaterFR.get_xmajorticklabels():
+        label.set_rotation(30)
+        label.set_horizontalalignment("right")
+
     plt.xlabel("Date and Time")
-    plt.ylabel("Temperature (K)")
     #plt.gcf().autofmt_xdate() # makes x-axis labels look nice, but the first label may stretch pretty far past the y-axis, so it might be undesirable; I have rotation=deg available above in ax.set_xticklabels(); another option is label.set_rotation
     plt.gcf().subplots_adjust(bottom=0.5)
     plt.tight_layout()    
     plt.draw()
-    
+
+    # Saving graphs #
     for j in range(0, len(graph_Special_Name)):
         fig_Special[j].savefig(graph_Special_Name[j])
+    for j in range(0, len(graph_TPH_Name)):
+        fig_TPH[j].savefig(graph_TPH_Name[j])
+    fig_WaterFR.savefig(graph_WaterFR_Name)
 
     iterNum += 1
     print("Just saved to all %s\n" % graph_Special_Name)
-    plt.pause(sleepTime) # waits sleepTime amount of seconds before taking sample again
+    print("Sleeping for %s seconds" % sleepTime)
+    #time.sleep(sleepTime)
+    plt.pause(sleepTime) # waits sleepTime amount of seconds before taking sample again; interestingly, the recorded time delay on cryo-LS372-Temp.dat is twice that of sleepTime, even if you use time.sleep()
     ## end of one while loop iteration (you can breathe) 
 
 print("end of while")
