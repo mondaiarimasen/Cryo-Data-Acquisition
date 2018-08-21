@@ -1,6 +1,6 @@
 <!-- Victor Zhang, created August 14, 2018 -->
 <!-- Website to monitor all data recorded -->
-<!-- version 4.0.0-->
+<!-- version 4.1.0-->
 <!-- HTML&CSS -->
 
 <!DOCTYPE html>
@@ -158,7 +158,9 @@
           }
           else{
             printDat += '<td style = "text-align:center;color:red">' + tempRow[j] + '</td>';
-            sendWarning(channelNames[j] + ' Temp.', channelNames[j] + ' (Chl ' + j.toString() + ') Temp.', tempRow[j], 'K', chlTemp_Low[j-1], chlTemp_Up[j-1]);
+            if (i==dat.length-2){// only send email notif. if most recent data is out of limits
+              sendWarning(channelNames[j] + ' Temp.', channelNames[j] + ' (Chl ' + j.toString() + ') Temp.', tempRow[j], 'K', chlTemp_Low[j-1], chlTemp_Up[j-1]);
+            }
           }
         }
       }
@@ -178,7 +180,9 @@
                 }
                 else{
                     printDat += '<td style = "text-align:center;color:red">' + tempRow[j] + '</td>';
-                    sendWarning(channelNames[j] + ' Temp.', channelNames[j] + ' (Chl ' + j.toString() + ') Temp.', tempRow[j], 'K', chlTemp_Low[j-1], chlTemp_Up[j-1]);
+                    if (i==dat.length-2){ // only send email notif. if most recent data is out of limits
+                      sendWarning(channelNames[j] + ' Temp.', channelNames[j] + ' (Chl ' + j.toString() + ') Temp.', tempRow[j], 'K', chlTemp_Low[j-1], chlTemp_Up[j-1]);
+                    }
                 }
             }
             printDat += "</tr>";
