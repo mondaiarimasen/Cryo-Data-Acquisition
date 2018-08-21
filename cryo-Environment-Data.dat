@@ -1,7 +1,7 @@
 mondaiarimasen
 Created August 14, 2018
 
-This data sheet records relevant data about the environment of room with the cryostat. Please preserve the order below (the order is also written in README.txt), and don't add punctuation after each line (e.g. variable_name = 4):
+This data sheet records relevant data about the environment of room with the cryostat. Please preserve the order, including spaces and new lines, below (the order is also written in README.txt), and don't add punctuation after each line (e.g. variable_name = 4):
 
 chl1_Low = 2
 chl1_Up = 300
@@ -44,8 +44,8 @@ presLab_Low = 900
 presLab_Up = 1200
 
 humLab = 30
-humLab_Low = 28
-humLab_Up = 30
+humLab_Low = 50
+humLab_Up = 100
 
 nitroTrapWght = 20
 nitroTrapWght_Low = 19
@@ -88,9 +88,13 @@ tempHeComp - Temp. (K) of He compressor
 tempHeComp_Low - Lower Temp. Limit (K)
 tempHeComp_up - Upper Temp. Limit (K)
 
-tempLab - Temp. (K) of lab
-tempLab_Low - Lower Temp. Limit (K)
-tempLab_Up - Upper Temp. Limit (K)
+tempLab - Temp. (C) of lab
+tempLab_Low - Lower Temp. Limit (C)
+tempLab_Up - Upper Temp. Limit (C)
+
+presLab - Pres. (hPa) of lab
+presLab_Low - Lower Pres. Limit (hPa)
+presLab_Up - Upper Pres. Limit (hPa)
 
 humLab - Humidity (%) of lab
 humLab_Low - Lower Humidity Limit (%)
