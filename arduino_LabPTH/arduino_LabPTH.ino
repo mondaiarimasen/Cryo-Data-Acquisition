@@ -38,5 +38,5 @@ void loop ( )  {
   Serial. print ( sensor.readFloatPressure ( ) / 100 ) ; // converts from Pa to HPa
   Serial.print(",");
   Serial. println ( sensor.readFloatHumidity ( ) ) ;
-  delay ( 10000 ) ;
+  delay ( 10*1000 ) ;
 }
