@@ -13,9 +13,9 @@ I. Motivation
           refrigerator (DR)
         > flow rate of the cooling water of the He compressor outside
           building
-        > temperature of the He compressor
-        > temperature and humidity of the lab room
-        > amount of nitrogen left in the nitrogen trap
+        > temperature of the He compressor (not yet implemented)
+        > temperature, pressure, and relative humidity of the lab room
+        > amount of nitrogen left in the nitrogen trap (not yet implemented)
 
   - send email warnings when readings are not in desired range
 
@@ -28,7 +28,7 @@ II. Program Descriptions
   - arduino_LabPTH/arduino_LabPTH.ino
         > gets the lab temperature, pressure, and relative humidity from
           connected Arduino device
-        > sends the data to serial port, which cryo-RealTime.py reads and 
+        > sends the data to serial port, which cryo-RealTime.py reads and
           updates to cryo-Environment-Data.dat
 
   - cryo-CoolingWaterMonitor.py
@@ -39,17 +39,15 @@ II. Program Descriptions
         > no consideration of noise in current version
         > updates cryo-Environment-Data.dat with the new cooling water flow
           rate
-        > not used, as of August 20, 2018, as integrating with 
+        > not used, as of August 20, 2018, as integrating with
           cryo-RealTime.py
 
   - cryo-DataView.html
-        > website to view all data read by the programs
+        > website to view all data read by cryo-RealTime.py
         > refreshes at user-decided frequency
-        > currently, data table with temperature readings from LS372 is only
-          displayed in Firefox, independent of operating system
-        > displays plots produced in real time by cryo-RealTime.py and file
-          update frequency can be made to show each new plot produced by
-          cryo-RealTime.py
+        > currently, data table with temperature readings from LS372 can
+          only be displayed in Firefox, independent of operating system
+        > displays plots produced in real time by cryo-RealTime.py
         > sends email notifications
 
   - cryo-Environment-Data.dat
@@ -77,9 +75,12 @@ II. Program Descriptions
               * tempHeComp (temp. of He compressor, K)
               * tempHeComp_Low (lower temp. limit of tempHeComp, K)
               * tempHeComp_Up (upper temp. limit of tempHeComp, K)
-              * tempLab (temp. of lab room with cryostat, K)
-              * tempLab_Low (lower temp. limit of tempLab, K)
-              * tempLab_Up (lower temp. limit of tempLab, K)
+              * tempLab (temp. of lab room with cryostat, C)
+              * tempLab_Low (lower temp. limit of tempLab, C)
+              * tempLab_Up (lower temp. limit of tempLab, C)
+              * presLab (pres. of lab room with cryostat, hPa)
+              * presLab_Low (lower temp. limit of presLab, hPa)
+              * presLab_Up (lower temp. limit of presLab, hPa)
               * humLab (humidity of lab room with cryostat, %)
               * humLab_Low (lower hum. limit of humLab, %)
               * humLab_Up (upper hum. limit of humLab, %)
@@ -91,7 +92,7 @@ II. Program Descriptions
               * dataDisNum (# of data rows in chl temp displayed)
 
   - cryo-Lab-PTH.dat
-        > text file containing all lab temperature, pressrure, and relative 
+        > text file containing all lab temperature, pressure, and relative
           humidity, as measured by Arduino device in one run
         > most recent value is stored in cryo-Environment-Data.dat
 
@@ -103,32 +104,50 @@ II. Program Descriptions
         > cryo-DataView.html reads this file to display on the website
 
   - cryo-RealTime.py
-        > gets data from the Lake Shore 372 (LS372) device, records to
-           cryo-LS372-Temp.dat, plots in real time, saves plot
-        > two types of plots are available: 'static' graph (x-axis is not
+        > gets DR data from the Lake Shore 372 (LS372) device; records to
+          cryo-LS372-Temp.dat
+        > two types of plots are drawn: 'static' graph (x-axis is not
           fixed length, so accommodates more and more data with time) and
           'shifting' graph (x-axis is fixed length so plot moves to always
           show most recent data; how recent is user-decided)
-        > plots all 8 channels on static graph, and PT1,2, 1K plate, and mK
+        > plots all 8 channels on static graph, and PT1, PT2, 1K, and mK
           plate temp. on separate shifting graphs
-        > plots lab temperature, pressure, and relative humidity, as 
-          measured by Arduino device; saves most recent data to 
-          cryo-Environment-Data.dat; logs all measured data in one run to 
-          cryo-Lab-PTH.dat
+        > gets lab temp., pres., and rel. hum. from Arduino device; records
+          to cryo-Lab-TPH.dat; plots data on sep. shifting graphs; saves
+          most recent data to cryo-Environment-Data.dat
+        > gets cooling water flow rate data from LabJack U3-LV; records to
+          cryo-WaterMeas.dat; plots data on shifting graph; saves most
+          recent data to cryo-Environment-Data.dat
+        > saves all plots generated
+
+  - cryo-WaterMeas.dat
+        > text file containing the calculated cooling water flow rate from
+          the measured voltage from the LabJack U3-LV
+        > most recent stored in cryo-Environment-Data.dat
 
   - cryo-clientCooling.py
         > client side to socket communication to send live the flow rate to
           main computer to display on webpage
+        > not used, as of August 20, 2018; see section III.
 
   - cryo-serverCooling.py
         > server side to socket communication
         > receives flow rate and updates cryo-Environment-Data.dat so that
           webpage can display it
+        > not used, as of August 20, 2018; see section III.
 
 *****************************************************************************
 III. Comments
 
   - DataView will most likely not be on a domain or server, as that is a bit
     complicated for current purposes
+
+  - August 21, 2018:
+        > cryo-CoolingWaterMonitor.py, cryo-clientCooling.py, and
+          cryo-serverCooling.py can be safely removed from this repository,
+          as its capabilities have been integrated into cryo-RealTime.py
+          (I have not done so, as the dilution refrigerator is in operation
+          at this moment, and I would like to interfere as little as
+          possible with the repository during its operation)
 
 *****************************************************************************
