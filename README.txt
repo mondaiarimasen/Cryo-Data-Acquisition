@@ -31,17 +31,6 @@ II. Program Descriptions
         > sends the data to serial port, which cryo-RealTime.py reads and
           updates to cryo-Environment-Data.dat
 
-  - cryo-CoolingWaterMonitor.py
-        > gets the cooling water flow rate by reading the voltage from the
-          monitor through the LabJack U3-LV
-        > converts voltage to water flow rate using experimentally
-          determined relationship
-        > no consideration of noise in current version
-        > updates cryo-Environment-Data.dat with the new cooling water flow
-          rate
-        > not used, as of August 20, 2018, as integrating with
-          cryo-RealTime.py
-
   - cryo-DataView.html
         > website to view all data read by cryo-RealTime.py
         > refreshes at user-decided frequency
@@ -52,6 +41,9 @@ II. Program Descriptions
 
   - cryo-Environment-Data.dat
         > text file containing data from the environment around the cryostat
+        > PLEASE DO NOT DELETE WHITESPACES/EMPTY LINES BETWEEN LINES AS
+          IN cryo-DataView.html AND cryo-RealTime.py THE POSITIONS OF SEVERAL
+          VARIABLES BELOW ARE HARDCODED
         > stores the values in the following order (please do not change):
               * chl1_Low (lower temp limit, K, of Chl 1, PT2 Head)
               * chl1_Up (upper temp limit, K, of Chl 1, PT2 Head)
@@ -91,7 +83,7 @@ II. Program Descriptions
                 temp on HTML page)
               * dataDisNum (# of data rows in chl temp displayed)
 
-  - cryo-Lab-PTH.dat
+  - cryo-Lab-TPH.dat
         > text file containing all lab temperature, pressure, and relative
           humidity, as measured by Arduino device in one run
         > most recent value is stored in cryo-Environment-Data.dat
@@ -119,35 +111,19 @@ II. Program Descriptions
           cryo-WaterMeas.dat; plots data on shifting graph; saves most
           recent data to cryo-Environment-Data.dat
         > saves all plots generated
+        > as of August 24, 2018, the x-axis date and time labels of the
+          plots generated in real time are NOT accurate, but saved date
+          and time values in cryo-LS372-Temp.dat ARE accurate
 
   - cryo-WaterMeas.dat
         > text file containing the calculated cooling water flow rate from
           the measured voltage from the LabJack U3-LV
-        > most recent stored in cryo-Environment-Data.dat
-
-  - cryo-clientCooling.py
-        > client side to socket communication to send live the flow rate to
-          main computer to display on webpage
-        > not used, as of August 20, 2018; see section III.
-
-  - cryo-serverCooling.py
-        > server side to socket communication
-        > receives flow rate and updates cryo-Environment-Data.dat so that
-          webpage can display it
-        > not used, as of August 20, 2018; see section III.
+        > most recent value stored in cryo-Environment-Data.dat
 
 *****************************************************************************
 III. Comments
 
-  - DataView will most likely not be on a domain or server, as that is a bit
+  - DataView is currently not on a domain or server, as that is a bit
     complicated for current purposes
-
-  - August 21, 2018:
-        > cryo-CoolingWaterMonitor.py, cryo-clientCooling.py, and
-          cryo-serverCooling.py can be safely removed from this repository,
-          as its capabilities have been integrated into cryo-RealTime.py
-          (I have not done so, as the dilution refrigerator is in operation
-          at this moment, and I would like to interfere as little as
-          possible with the repository during its operation)
 
 *****************************************************************************
