@@ -1,7 +1,7 @@
 mondaiarimasen
 Created August 14, 2018
 
-This data sheet records relevant data about the environment of room with the cryostat. Please preserve the order, including spaces and new lines, below (the order is also written in README.txt), and don't add punctuation after each line (e.g. variable_name = 4):
+This data sheet records relevant data about the environment of room with the cryostat. Please preserve the order of variables below (the order is also written in README.txt) and also preserve the whitespaces/empty lines inbetween lines as the positions of variables are hardcoded in programs that reference this document. Please don't add punctuation after each line (example of an ideal line: variable_name = 4). If you want to add new variables, add them to the end of the list, before the "Notes" section, and provide a brief description in the "Notes" section (following the previous entries):
 
 chl1_Low = 2
 chl1_Up = 300
@@ -27,23 +27,23 @@ chl7_Up = 300
 chl8_Low = 0.04
 chl8_Up = 300
 
-coolWaterFR = 7.918
+coolWaterFR = 6.931
 coolWaterFR_Low = 6.8
 coolWaterFR_Up = 9.0
 
 tempHeComp = 278
 tempHeComp_Low = 277
-tempHeComp_Up = 280
+tempHeComp_Up = 300
 
-tempLab = 25
+tempLab = 23.31
 tempLab_Low = 23
 tempLab_Up = 30
 
-presLab = 1012
+presLab = 1009.82
 presLab_Low = 900
 presLab_Up = 1200
 
-humLab = 30
+humLab = 63.00
 humLab_Low = 50
 humLab_Up = 100
 
@@ -88,13 +88,9 @@ tempHeComp - Temp. (K) of He compressor
 tempHeComp_Low - Lower Temp. Limit (K)
 tempHeComp_up - Upper Temp. Limit (K)
 
-tempLab - Temp. (C) of lab
-tempLab_Low - Lower Temp. Limit (C)
-tempLab_Up - Upper Temp. Limit (C)
-
-presLab - Pres. (hPa) of lab
-presLab_Low - Lower Pres. Limit (hPa)
-presLab_Up - Upper Pres. Limit (hPa)
+tempLab - Temp. (K) of lab
+tempLab_Low - Lower Temp. Limit (K)
+tempLab_Up - Upper Temp. Limit (K)
 
 humLab - Humidity (%) of lab
 humLab_Low - Lower Humidity Limit (%)
